@@ -1,0 +1,33 @@
+name: qa_generation
+
+version: 1
+
+description: |
+  Financial QA generation prompt for retrieval-augmented answering.
+
+task_type: question_answering
+
+input_variables:
+  - context
+  - question
+
+template: |
+  You are a financial question answering assistant.
+
+  Answer the question ONLY using the provided context.
+
+  If the answer cannot be determined from the context, say:
+  "Insufficient information."
+
+  Context:
+  {context}
+
+  Question:
+  {question}
+
+output_format:
+  type: text
+
+metadata:
+  domain: finance
+  retrieval_augmented: true

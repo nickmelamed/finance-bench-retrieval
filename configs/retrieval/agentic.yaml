@@ -1,0 +1,51 @@
+name: agentic
+
+top_k: 5
+
+# iterative retrieval
+
+max_iterations: 3
+
+# query refinement
+
+max_search_queries: 8
+
+min_term_length: 3
+
+remove_stopwords: true
+
+# retrieval reflection
+
+min_relevance_score: 2.0
+
+retry_on_low_results: true
+
+min_unique_results: 3
+
+# exploration
+
+expand_neighbors: true
+
+neighbor_window: 1
+
+diversify_results: true
+
+max_results_per_document: 2
+
+# scoring
+
+term_match_weight: 1.0
+
+exact_phrase_boost: 2.0
+
+numeric_match_boost: 1.5
+
+# query expansion
+
+enable_query_expansion: true
+
+finance_synonym_expansion: true
+
+# diagnostics
+
+verbose: false

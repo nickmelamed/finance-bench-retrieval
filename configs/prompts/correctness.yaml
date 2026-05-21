@@ -1,0 +1,43 @@
+name: correctness_grading
+
+version: 1
+
+description: |
+  Grades whether a generated answer matches the gold answer.
+
+task_type: evaluation
+
+input_variables:
+  - question
+  - gold_answer
+  - generated_answer
+
+template: |
+  You are evaluating whether a generated answer matches the gold answer.
+
+  Return JSON only.
+
+  {{
+    "correct": true/false,
+    "reason": "brief explanation"
+  }}
+
+  Question:
+  {question}
+
+  Gold Answer:
+  {gold_answer}
+
+  Generated Answer:
+  {generated_answer}
+
+output_format:
+  type: json
+
+output_schema:
+  correct: boolean
+  reason: string
+
+metadata:
+  evaluator_type: llm_judge
+  strict_json: true

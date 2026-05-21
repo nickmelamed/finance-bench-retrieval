@@ -1,0 +1,15 @@
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.venv/
+.env
+finance_bench_retrieval.*
+financebench_retrieval_eval.*
+
+outputs/
+
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+.ipynb_checkpoints/

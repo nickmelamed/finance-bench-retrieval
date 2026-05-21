@@ -1,0 +1,4 @@
+name: dense
+embedding_model: BAAI/bge-large-en-v1.5
+similarity_metric: cosine
+normalize_embeddings: true

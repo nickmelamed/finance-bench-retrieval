@@ -1,0 +1,3 @@
+name: hybrid
+fusion: reciprocal_rank_fusion
+rrf_k: 60

@@ -1,0 +1,41 @@
+[project]
+name = "financebench-retrieval-eval"
+version = "0.1.0"
+description = "Production-grade retrieval evaluation framework for FinanceBench"
+readme = "README.md"
+requires-python = ">=3.11"
+
+dependencies = [
+    "anthropic>=0.57.1",
+    "datasets>=3.0.0",
+    "numpy>=2.0.0",
+    "pandas>=2.2.0",
+    "scipy>=1.13.0",
+    "matplotlib>=3.9.0",
+    "pydantic>=2.9.0",
+    "pyyaml>=6.0.2",
+    "python-dotenv>=1.0.1",
+    "qdrant-client>=1.11.0",
+    "sentence-transformers>=3.0.0",
+    "rank-bm25>=0.2.2",
+    "diskcache>=5.6.3",
+    "tqdm>=4.66.0",
+    "rich>=13.8.0",
+    "tenacity>=9.0.0",
+    "orjson>=3.10.0",
+    "pytest>=8.3.0",
+    "rapidfuzz>=3.9.0",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 88
+
+[tool.black]
+line-length = 88
