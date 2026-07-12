@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from src.retrieval.bm25 import BM25Retriever
 from src.retrieval.dense import DenseRetriever
 from src.retrieval.hybrid import HybridRetriever
-from src.retrieval.agentic import AgenticGrepRetriever
+from src.retrieval.agentic import AgenticRetriever
 
 from src.evaluation.qa_metrics import (
     accuracy,
@@ -36,10 +36,7 @@ from src.visualizations.plots import (
     PlotGenerator,
 )
 
-from src.config.loaders import (
-    load_yaml_config,
-    load_yaml,
-)
+from src.config.loaders import load_yaml_config
 
 from src.types.schemas import (
     ExperimentConfig,
@@ -226,8 +223,6 @@ def evaluate_qa(
     questions: list[dict],
 ):
 
-    correctness = []
-
     total_questions = len(questions)
 
     print(
@@ -236,42 +231,155 @@ def evaluate_qa(
         f"{total_questions} questions..."
     )
 
+    # phase 1: retrieval - sequential and unavoidable, since a
+    # multi-turn tool-use conversation (agentic) can't be batched:
+    # each turn depends on the previous turn's result.
+
+    retrieved_per_question = []
+
+    retrieval_usage_per_question = []
+
     for idx, item in enumerate(questions):
 
-        question = item["question"]
-
-        gold_answer = item["gold_answer"]
-
         retrieved = retriever.retrieve(
-            question
+            item["question"]
         )
 
-        result = pipeline.evaluate(
-            question=question,
-            gold_answer=gold_answer,
-            retrieved_chunks=retrieved,
+        retrieval_prompt_tokens, retrieval_completion_tokens = (
+            retriever.last_retrieval_usage()
         )
 
-        correctness.append(
-            int(
-                result["grading"]["correct"]
+        pipeline.token_tracker.add_prompt_tokens(
+            retrieval_prompt_tokens
+        )
+
+        pipeline.token_tracker.add_completion_tokens(
+            retrieval_completion_tokens
+        )
+
+        retrieved_per_question.append(retrieved)
+
+        retrieval_usage_per_question.append(
+            (
+                retrieval_prompt_tokens,
+                retrieval_completion_tokens,
+                retriever.last_retrieval_turn_count(),
             )
         )
 
         if (idx + 1) % 10 == 0:
 
-            running_acc = (
-                sum(correctness)
-                / len(correctness)
+            print(
+                f"[{name}] retrieval "
+                f"{idx + 1}/{total_questions}"
             )
 
-            print(
-                f"[{name}] "
-                f"{idx + 1}/"
-                f"{total_questions} "
-                f"| Accuracy: "
-                f"{running_acc:.4f}"
+    # phase 2: batch QA generation - one Anthropic Message Batch for
+    # all {total_questions} prompts instead of {total_questions}
+    # synchronous calls (50% cheaper; no per-turn dependency here,
+    # every question's answer is independent of every other's).
+
+    print(
+        f"\n[{name}] submitting QA-generation batch "
+        f"({total_questions} questions)..."
+    )
+
+    contexts = [
+        pipeline.build_context(retrieved)
+        for retrieved in retrieved_per_question
+    ]
+
+    questions_and_contexts = [
+        (item["question"], context)
+        for item, context in zip(questions, contexts)
+    ]
+
+    generated_answers = pipeline.answer_batch(
+        questions_and_contexts
+    )
+
+    print(f"[{name}] QA-generation batch complete.")
+
+    # phase 3: batch grading - deterministic matches never touch the
+    # API; only ambiguous answers are batched to the LLM judge.
+
+    print(f"[{name}] grading...")
+
+    grading_items = [
+        {
+            "question": item["question"],
+            "gold_answer": item["gold_answer"],
+            "generated_answer": answer,
+        }
+        for item, answer in zip(questions, generated_answers)
+    ]
+
+    gradings_and_usage = pipeline.grader.grade_batch(
+        grading_items
+    )
+
+    correctness = []
+
+    per_question = []
+
+    for item, generated_answer, retrieved, retrieval_usage, (
+        grading,
+        judge_usage,
+    ) in zip(
+        questions,
+        generated_answers,
+        retrieved_per_question,
+        retrieval_usage_per_question,
+        gradings_and_usage,
+    ):
+
+        pipeline.token_tracker.add_prompt_tokens(
+            judge_usage["input_tokens"]
+        )
+
+        pipeline.token_tracker.add_completion_tokens(
+            judge_usage["output_tokens"]
+        )
+
+        is_correct = int(grading["correct"])
+
+        correctness.append(is_correct)
+
+        if not is_correct:
+
+            pipeline.failure_analyzer.classify(
+                question=item["question"],
+                generated_answer=generated_answer,
+                gold_answer=item["gold_answer"],
+                retrieved_chunks=retrieved,
             )
+
+        retrieval_prompt_tokens, retrieval_completion_tokens, retrieval_turns = (
+            retrieval_usage
+        )
+
+        per_question.append(
+            {
+                "question_id": item.get("question_id"),
+                "question": item["question"],
+                "gold_answer": item["gold_answer"],
+                "generated_answer": generated_answer,
+                "correct": bool(is_correct),
+                "retrieval_prompt_tokens": retrieval_prompt_tokens,
+                "retrieval_completion_tokens": retrieval_completion_tokens,
+                "retrieval_turns": retrieval_turns,
+                "retrieved_chunk_ids": [
+                    r.chunk_id for r in retrieved
+                ],
+            }
+        )
+
+    running_acc = (
+        sum(correctness) / len(correctness)
+        if correctness else 0.0
+    )
+
+    print(f"[{name}] Accuracy: {running_acc:.4f}")
 
     tokens = (
         pipeline
@@ -294,7 +402,8 @@ def evaluate_qa(
         "correctness": correctness,
         "failures": (
             pipeline.failure_analyzer.summary()
-        )
+        ),
+        "per_question": per_question,
     }
 
 
@@ -338,9 +447,11 @@ def main():
             dense_config=dense_config,
         ),
 
-        "agentic": AgenticGrepRetriever(
+        "agentic": AgenticRetriever(
             chunks=chunks,
             config=agentic_config,
+            bm25_config=bm25_config,
+            dense_config=dense_config,
         ),
     }
 
@@ -383,10 +494,12 @@ def main():
 
         results.append(combined)
 
-    tracker.save_results(
-        "evaluation_results.json",
-        results,
-    )
+        # save after every method so a later method crashing  
+        # shouldn't lose already-computed results for the ones that finished
+        tracker.save_results(
+            "evaluation_results.json",
+            results,
+        )
 
     # visualizations 
 

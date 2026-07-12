@@ -1,39 +1,45 @@
 import json
 
-from src.retrieval.agentic import AgenticGrepRetriever
+from dotenv import load_dotenv
+
 from src.config.loaders import load_yaml_config
-from src.types.schemas import AgenticConfig
+from src.retrieval.agentic import AgenticRetriever
+from src.types.schemas import AgenticConfig, BM25Config, DenseConfig, DocumentChunk
 
-config = load_yaml_config(
-    "retrieval/agentic.yaml",
-    AgenticConfig
-)
+load_dotenv()
 
-with open(
-    "data/processed/financebench_examples.json"
-) as f:
+config = load_yaml_config("retrieval/agentic.yaml", AgenticConfig)
+bm25_config = load_yaml_config("retrieval/bm25.yaml", BM25Config)
+dense_config = load_yaml_config("retrieval/dense.yaml", DenseConfig)
+
+with open("data/processed/financebench_examples.json") as f:
     examples = json.load(f)
-
 
 example = examples[0]
 
 query = example["question"]
 
-
 with open("data/processed/chunks.json") as f:
-    chunks = json.load(f)
+    raw_chunks = json.load(f)
 
+chunks = [DocumentChunk.model_validate(chunk) for chunk in raw_chunks]
 
-retriever = AgenticGrepRetriever(
+retriever = AgenticRetriever(
     chunks=chunks,
-    config=config
+    config=config,
+    bm25_config=bm25_config,
+    dense_config=dense_config,
 )
-
 
 results = retriever.retrieve(query)
 
+print(f"Question: {query}\n")
 
 for result in results:
     print("=" * 80)
     print(result.score)
     print(result.text[:500])
+
+prompt_tokens, completion_tokens = retriever.last_retrieval_usage()
+
+print(f"\nRetrieval-time tokens: {prompt_tokens} prompt / {completion_tokens} completion")
