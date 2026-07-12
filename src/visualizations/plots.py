@@ -22,7 +22,7 @@ class PlotGenerator:
         plt.figure(figsize=(8, 5))
 
         errors = [
-            [a - l for a, l in zip(accuracies, lower_bounds)],
+            [a - lo for a, lo in zip(accuracies, lower_bounds)],
             [u - a for a, u in zip(accuracies, upper_bounds)],
         ]
 

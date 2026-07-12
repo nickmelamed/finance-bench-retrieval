@@ -1,49 +1,13 @@
-from src.evaluation.bootstrap import BootstrapCI
+import math
 
-from evaluation.qa_metrics import (
-    accuracy,
-    token_efficiency,
-)
-
-from src.llm.token_tracking import (
-    TokenTracker,
-)
-
-# bootstrap validation
-
-values = [
-    1,
-    1,
-    0,
-    1,
-    1,
-    0,
-    1,
-]
-
-bootstrap = BootstrapCI()
-
-result = bootstrap.compute(values)
+from src.evaluation.qa_metrics import accuracy, token_efficiency
 
 
-# Accuracy validation 
+def test_accuracy():
+    assert accuracy([1, 1, 0, 1]) == 0.75
+    assert accuracy([]) == 0.0
 
-accuracy(values)
 
-# Token accounting validation 
-
-tracker = TokenTracker()
-
-tracker.add_prompt_tokens(100)
-tracker.add_completion_tokens(50)
-tracker.add_retrieval_tokens(25)
-
-tracker.summary()
-
-# token efficiency validation 
-
-token_efficiency(
-    total_tokens=1000,
-    correct_answers=5,
-)
-
+def test_token_efficiency():
+    assert token_efficiency(total_tokens=1000, correct_answers=5) == 200
+    assert math.isinf(token_efficiency(total_tokens=1000, correct_answers=0))
