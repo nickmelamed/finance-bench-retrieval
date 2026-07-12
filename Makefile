@@ -40,17 +40,18 @@ qdrant-down:
 qdrant-logs:
 	docker compose logs -f qdrant
 
-# retrieval 
+# retrieval
 
-.PHONY: index ingest bm25 dense hybrid agentic evaluate full
+.PHONY: index align bm25 dense hybrid agentic evaluate dashboard full
 
-# Build / refresh Qdrant index
+# Full ingestion (chunk + save) + embed/upload to Qdrant
 index:
 	python -m src.experiments.setup_index
 
-# Optional explicit ingestion step
-ingest:
-	python -m src.ingest.build_corpus
+# Align gold evidence to chunk ids (run after `index`, before `evaluate` -
+# `index` overwrites financebench_examples.json from the raw dataset)
+align:
+	python -m src.evaluation.build_gold_alignment
 
 # Individual retrieval evaluations
 bm25:
@@ -69,6 +70,10 @@ agentic:
 evaluate:
 	python -m src.experiments.run_all
 
+# Regenerate the static dashboard's data from outputs/runs/*
+dashboard:
+	python -m src.visualizations.export_dashboard_data
+
 # Full end-to-end pipeline:
-# ingestion -> indexing -> evaluation
-full: qdrant-up ingest index evaluate
+# indexing -> gold alignment -> evaluation -> dashboard
+full: qdrant-up index align evaluate dashboard

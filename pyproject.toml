@@ -36,6 +36,7 @@ testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 88
+exclude = ["notebooks"]
 
 [tool.black]
 line-length = 88
