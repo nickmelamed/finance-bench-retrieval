@@ -25,3 +25,20 @@ class BaseRetriever(ABC):
         query: str,
     ) -> list[RetrievalResult]:
         raise NotImplementedError
+
+    def last_retrieval_usage(self) -> tuple[int, int]:
+        """
+        (prompt_tokens, completion_tokens) spent by the most
+        recent `retrieve()` call. Static retrievers spend no
+        LLM tokens, so the default is (0, 0); retrievers that
+        call an LLM during retrieval (e.g. a tool-using agent)
+        should override this.
+        """
+        return (0, 0)
+
+    def last_retrieval_turn_count(self) -> int:
+        """
+        Number of LLM turns spent by the most recent `retrieve()`
+        call. Static retrievers spend none, so the default is 0.
+        """
+        return 0

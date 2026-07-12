@@ -5,8 +5,6 @@ from src.retrieval.fusion import (
     ReciprocalRankFusion,
 )
 
-from src.config.loaders import load_yaml_config
-
 from src.types.schemas import (
     RetrievalResult,
     HybridConfig,

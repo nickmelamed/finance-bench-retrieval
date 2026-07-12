@@ -127,8 +127,6 @@ def main():
 
     dataset = FinanceBenchDataset()
 
-    embedder = EmbeddingModel()
-
     examples = dataset.load()
 
     print(
