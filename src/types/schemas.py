@@ -215,79 +215,52 @@ class AgenticConfig(BaseRetrieverConfig):
 
     name: Literal["agentic"]
 
-    # iterative retrieval
+    # which Claude model drives the tool-use loop
 
-    max_iterations: int = Field(
-        default=3,
+    model: str = "claude-sonnet-4-6"
+
+    # loop bounds
+
+    max_tool_calls: int = Field(
+        default=4,
         gt=0,
     )
 
-    max_search_queries: int = Field(
-        default=8,
+    max_tokens_per_turn: int = Field(
+        default=1024,
         gt=0,
     )
 
-    # token filtering
+    # tool behavior
 
-    min_term_length: int = Field(
-        default=3,
+    search_top_k: int = Field(
+        default=5,
         gt=0,
     )
-
-    remove_stopwords: bool = True
-
-    # retrieval reflection
-
-    min_relevance_score: float = Field(
-        default=2.0,
-        ge=0.0,
-    )
-
-    retry_on_low_results: bool = True
-
-    min_unique_results: int = Field(
-        default=3,
-        gt=0,
-    )
-
-    # exploration
-
-    expand_neighbors: bool = True
 
     neighbor_window: int = Field(
         default=1,
         ge=0,
     )
 
-    diversify_results: bool = True
-
-    max_results_per_document: int = Field(
-        default=2,
+    # chunk preview length inside tool results - the agent only needs
+    # enough to judge relevance during exploration; the final QA answer
+    # always uses the full untruncated chunk text regardless of this
+    tool_result_preview_chars: int = Field(
+        default=600,
         gt=0,
     )
 
-    # scoring
+    use_dense_tool: bool = True
 
-    term_match_weight: float = Field(
-        default=1.0,
+    use_rerank_tool: bool = True
+
+    # context management (prompt caching + trimming)
+
+    keep_recent_tool_turns: int = Field(
+        default=5,
         gt=0,
     )
-
-    exact_phrase_boost: float = Field(
-        default=2.0,
-        ge=0,
-    )
-
-    numeric_match_boost: float = Field(
-        default=1.5,
-        ge=0,
-    )
-
-    # query expansion
-
-    enable_query_expansion: bool = True
-
-    finance_synonym_expansion: bool = True
 
     # diagnostics
 
