@@ -1,0 +1,1089 @@
+<meta charset="UTF-8" />
+<title>FinanceBench Retrieval — Results Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="data.js"></script>
+
+<style>
+  :root {
+    --surface-1: #fcfcfb;
+    --page: #f9f9f7;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #898781;
+    --gridline: #e1e0d9;
+    --baseline: #c3c2b7;
+    --border: rgba(11, 11, 11, 0.1);
+
+    --series-1: #2a78d6; /* bm25 */
+    --series-2: #1baf7a; /* dense */
+    --series-3: #eda100; /* hybrid */
+    --series-4: #008300; /* agentic */
+
+    --good: #0ca30c;
+    --critical: #d03b3b;
+  }
+
+  :root[data-theme="dark"] {
+    --surface-1: #1a1a19;
+    --page: #0d0d0d;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #898781;
+    --gridline: #2c2c2a;
+    --baseline: #383835;
+    --border: rgba(255, 255, 255, 0.1);
+
+    --series-1: #3987e5;
+    --series-2: #199e70;
+    --series-3: #c98500;
+    --series-4: #008300;
+
+    --good: #0ca30c;
+    --critical: #e66767;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --surface-1: #1a1a19;
+      --page: #0d0d0d;
+      --text-primary: #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted: #898781;
+      --gridline: #2c2c2a;
+      --baseline: #383835;
+      --border: rgba(255, 255, 255, 0.1);
+
+      --series-1: #3987e5;
+      --series-2: #199e70;
+      --series-3: #c98500;
+      --series-4: #008300;
+
+      --good: #0ca30c;
+      --critical: #e66767;
+    }
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding: 24px 20px 64px;
+  }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-size: 22px;
+    margin: 0 0 4px;
+  }
+
+  .subtitle {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin: 0;
+  }
+
+  .controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  select,
+  input[type="search"] {
+    font: inherit;
+    font-size: 13px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface-1);
+    color: var(--text-primary);
+  }
+
+  button.theme-toggle {
+    font: inherit;
+    font-size: 13px;
+    padding: 7px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface-1);
+    color: var(--text-primary);
+    cursor: pointer;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin: 4px 0 20px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+  }
+
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .stat-tile {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+
+  .stat-tile .label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+
+  .stat-tile .value {
+    font-size: 24px;
+    font-weight: 600;
+  }
+
+  .stat-tile .sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .charts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+
+  .card h2 {
+    font-size: 14px;
+    margin: 0 0 2px;
+  }
+
+  .card .card-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 0 0 12px;
+  }
+
+  .chart-holder {
+    position: relative;
+    height: 280px;
+    max-width: 100%;
+  }
+
+  .table-card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+
+  .table-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+    align-items: center;
+  }
+
+  .table-toolbar .count {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-left: auto;
+  }
+
+  .table-scroll {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 13px;
+    min-width: 640px;
+  }
+
+  thead th {
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--gridline);
+    padding: 8px 10px;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  thead th.method-col {
+    text-align: center;
+  }
+
+  tbody td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--gridline);
+    vertical-align: top;
+  }
+
+  tbody tr.q-row:hover {
+    background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+    cursor: pointer;
+  }
+
+  td.q-text {
+    max-width: 360px;
+  }
+
+  td.method-col {
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .badge {
+    display: inline-flex;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+  }
+
+  .badge.correct {
+    background: var(--good);
+  }
+
+  .badge.incorrect {
+    background: var(--critical);
+  }
+
+  tr.detail-row td {
+    background: color-mix(in srgb, var(--text-primary) 3%, transparent);
+    font-size: 12.5px;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+    padding: 4px 0;
+  }
+
+  .detail-block .k {
+    color: var(--text-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin-bottom: 3px;
+  }
+
+  .detail-block .v {
+    color: var(--text-primary);
+  }
+
+  .chunk-id {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  .empty-note {
+    color: var(--text-muted);
+    font-size: 13px;
+    padding: 20px 4px;
+  }
+
+  footer {
+    margin-top: 28px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>FinanceBench Retrieval — Results Dashboard</h1>
+      <p class="subtitle">
+        BM25 vs. dense vs. hybrid vs. tool-using agentic retrieval, evaluated
+        on accuracy, token efficiency, and retrieval quality.
+      </p>
+    </div>
+    <div class="controls">
+      <select id="run-picker" aria-label="Select run"></select>
+      <button class="theme-toggle" id="theme-toggle" type="button">
+        Toggle theme
+      </button>
+    </div>
+  </header>
+
+  <div class="legend" id="legend"></div>
+
+  <div class="kpi-row" id="kpi-row"></div>
+
+  <div class="charts">
+    <div class="card">
+      <h2>Accuracy by method</h2>
+      <p class="card-sub">95% bootstrap confidence interval</p>
+      <div class="chart-holder"><canvas id="chart-accuracy"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>Accuracy vs. token efficiency</h2>
+      <p class="card-sub">
+        Down-and-right is better (fewer tokens per correct answer, higher
+        accuracy)
+      </p>
+      <div class="chart-holder"><canvas id="chart-pareto"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>Retrieval quality</h2>
+      <p class="card-sub">Recall@k, hit rate, and MRR against gold evidence chunks</p>
+      <div class="chart-holder"><canvas id="chart-retrieval"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>Failure modes</h2>
+      <p class="card-sub">Classified causes behind incorrect answers</p>
+      <div class="chart-holder"><canvas id="chart-failures"></canvas></div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-toolbar">
+      <input
+        type="search"
+        id="q-search"
+        placeholder="Search questions…"
+        aria-label="Search questions"
+      />
+      <select id="q-filter" aria-label="Filter questions"></select>
+      <span class="count" id="q-count"></span>
+    </div>
+    <div class="table-scroll">
+      <table id="q-table">
+        <thead>
+          <tr id="q-table-head"></tr>
+        </thead>
+        <tbody id="q-table-body"></tbody>
+      </table>
+    </div>
+    <div class="empty-note" id="q-empty" style="display: none">
+      This run predates per-question drill-down data (added alongside the
+      tool-using agentic retriever). Re-run <code>make evaluate</code> and
+      <code>make dashboard</code> to populate it.
+    </div>
+  </div>
+
+  <footer>
+    Generated by <code>src/visualizations/export_dashboard_data.py</code>.
+    Open this file directly in a browser — no server required.
+  </footer>
+</div>
+
+<script>
+  const METHOD_ORDER = ["bm25", "dense", "hybrid", "agentic"];
+  const METHOD_LABEL = {
+    bm25: "BM25",
+    dense: "Dense",
+    hybrid: "Hybrid",
+    agentic: "Agentic",
+  };
+  const METHOD_VAR = {
+    bm25: "--series-1",
+    dense: "--series-2",
+    hybrid: "--series-3",
+    agentic: "--series-4",
+  };
+
+  const runs = (window.EVAL_RUNS || []).slice();
+  let charts = {};
+  let activeRun = null;
+  let sortState = { key: null, dir: 1 };
+
+  function cssVar(name) {
+    return getComputedStyle(document.documentElement)
+      .getPropertyValue(name)
+      .trim();
+  }
+
+  function methodColor(method) {
+    return cssVar(METHOD_VAR[method] || "--series-1");
+  }
+
+  function orderedMethods(methods) {
+    const byName = Object.fromEntries(methods.map((m) => [m.method, m]));
+    return METHOD_ORDER.filter((name) => byName[name]).map(
+      (name) => byName[name]
+    );
+  }
+
+  function fmtPct(x) {
+    return `${(x * 100).toFixed(1)}%`;
+  }
+
+  function fmtInt(x) {
+    return Math.round(x).toLocaleString();
+  }
+
+  // run picker
+
+  function populateRunPicker() {
+    const picker = document.getElementById("run-picker");
+    picker.innerHTML = "";
+    runs.forEach((run, i) => {
+      const opt = document.createElement("option");
+      opt.value = String(i);
+      opt.textContent = run.run_id;
+      picker.appendChild(opt);
+    });
+    picker.value = String(runs.length - 1);
+    picker.addEventListener("change", () => {
+      renderAll(runs[Number(picker.value)]);
+    });
+  }
+
+  // shared legend
+
+  function renderLegend(methods) {
+    const el = document.getElementById("legend");
+    el.innerHTML = "";
+    methods.forEach((m) => {
+      const item = document.createElement("div");
+      item.className = "legend-item";
+
+      const swatch = document.createElement("span");
+      swatch.className = "legend-swatch";
+      swatch.style.background = methodColor(m.method);
+
+      const label = document.createElement("span");
+      label.textContent = METHOD_LABEL[m.method] || m.method;
+
+      item.appendChild(swatch);
+      item.appendChild(label);
+      el.appendChild(item);
+    });
+  }
+
+  // KPI tiles
+
+  function renderKpis(methods) {
+    const el = document.getElementById("kpi-row");
+    el.innerHTML = "";
+
+    const best = methods.reduce((a, b) => (b.accuracy > a.accuracy ? b : a));
+    const mostEfficient = methods.reduce((a, b) =>
+      b.token_efficiency < a.token_efficiency ? b : a
+    );
+    const totalQuestions = methods[0]?.correctness?.length || 0;
+
+    const tiles = [
+      {
+        label: "Best accuracy",
+        value: fmtPct(best.accuracy),
+        sub: METHOD_LABEL[best.method] || best.method,
+      },
+      {
+        label: "Most token-efficient",
+        value: `${fmtInt(mostEfficient.token_efficiency)} tok/correct`,
+        sub: METHOD_LABEL[mostEfficient.method] || mostEfficient.method,
+      },
+      {
+        label: "Questions evaluated",
+        value: fmtInt(totalQuestions),
+        sub: "FinanceBench open-source subset",
+      },
+    ];
+
+    tiles.forEach((t) => {
+      const tile = document.createElement("div");
+      tile.className = "stat-tile";
+      tile.innerHTML = `
+        <div class="label"></div>
+        <div class="value"></div>
+        <div class="sub"></div>
+      `;
+      tile.querySelector(".label").textContent = t.label;
+      tile.querySelector(".value").textContent = t.value;
+      tile.querySelector(".sub").textContent = t.sub;
+      el.appendChild(tile);
+    });
+  }
+
+  // chart plugins (drawn manually, so no extra CDN deps)
+
+  const barValueLabelPlugin = {
+    id: "barValueLabel",
+    afterDatasetsDraw(chart) {
+      const { ctx } = chart;
+      const meta = chart.getDatasetMeta(0);
+      const data = chart.data.datasets[0].data;
+      ctx.save();
+      ctx.fillStyle = cssVar("--text-primary");
+      ctx.font = "12px system-ui, sans-serif";
+      ctx.textAlign = "center";
+      meta.data.forEach((bar, i) => {
+        ctx.fillText(`${data[i].toFixed(1)}%`, bar.x, bar.y - 16);
+      });
+      ctx.restore();
+    },
+  };
+
+  const ciWhiskerPlugin = {
+    id: "ciWhisker",
+    afterDatasetsDraw(chart) {
+      const { ctx, scales } = chart;
+      const meta = chart.getDatasetMeta(0);
+      const cis = chart.options.plugins?.ciWhisker?.data;
+      if (!cis) return;
+      ctx.save();
+      ctx.strokeStyle = cssVar("--text-secondary");
+      ctx.lineWidth = 1.5;
+      meta.data.forEach((bar, i) => {
+        const ci = cis[i];
+        if (!ci) return;
+        const x = bar.x;
+        const yLow = scales.y.getPixelForValue(ci.lower * 100);
+        const yHigh = scales.y.getPixelForValue(ci.upper * 100);
+        ctx.beginPath();
+        ctx.moveTo(x, yLow);
+        ctx.lineTo(x, yHigh);
+        ctx.moveTo(x - 5, yLow);
+        ctx.lineTo(x + 5, yLow);
+        ctx.moveTo(x - 5, yHigh);
+        ctx.lineTo(x + 5, yHigh);
+        ctx.stroke();
+      });
+      ctx.restore();
+    },
+  };
+
+  const pointLabelPlugin = {
+    id: "pointLabel",
+    afterDatasetsDraw(chart) {
+      const { ctx } = chart;
+      const meta = chart.getDatasetMeta(0);
+      const labels = chart.options.plugins?.pointLabel?.labels || [];
+      ctx.save();
+      ctx.fillStyle = cssVar("--text-primary");
+      ctx.font = "12px system-ui, sans-serif";
+      ctx.textAlign = "center";
+      meta.data.forEach((point, i) => {
+        ctx.fillText(labels[i] || "", point.x, point.y - 12);
+      });
+      ctx.restore();
+    },
+  };
+
+  function baseGrid() {
+    return {
+      color: cssVar("--gridline"),
+      drawTicks: false,
+    };
+  }
+
+  function baseTicks() {
+    return { color: cssVar("--text-muted"), font: { size: 11 } };
+  }
+
+  function destroyChart(key) {
+    if (charts[key]) {
+      charts[key].destroy();
+      delete charts[key];
+    }
+  }
+
+  // chart: accuracy with CI whiskers
+
+  function renderAccuracyChart(methods) {
+    destroyChart("accuracy");
+    const ctx = document.getElementById("chart-accuracy");
+
+    const labels = methods.map((m) => METHOD_LABEL[m.method] || m.method);
+    const values = methods.map((m) => m.accuracy * 100);
+    const colors = methods.map((m) => methodColor(m.method));
+    const cis = methods.map((m) => m.bootstrap_ci || null);
+
+    const config = {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [
+          {
+            data: values,
+            backgroundColor: colors,
+            borderColor: cssVar("--surface-1"),
+            borderWidth: 2,
+            borderRadius: { topLeft: 4, topRight: 4 },
+            borderSkipped: "bottom",
+            maxBarThickness: 48,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { top: 20 } },
+        plugins: {
+          legend: { display: false },
+          tooltip: tooltipCfg("%"),
+          ciWhisker: { data: cis },
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: baseTicks() },
+          y: {
+            beginAtZero: true,
+            max: 100,
+            grid: baseGrid(),
+            ticks: { ...baseTicks(), callback: (v) => `${v}%` },
+          },
+        },
+      },
+      plugins: [barValueLabelPlugin, ciWhiskerPlugin],
+    };
+
+    charts.accuracy = new Chart(ctx, config);
+  }
+
+  // chart: pareto scatter
+
+  function renderParetoChart(methods) {
+    destroyChart("pareto");
+    const ctx = document.getElementById("chart-pareto");
+
+    const points = methods
+      .filter((m) => Number.isFinite(m.token_efficiency))
+      .map((m) => ({ x: m.token_efficiency, y: m.accuracy * 100 }));
+    const colors = methods
+      .filter((m) => Number.isFinite(m.token_efficiency))
+      .map((m) => methodColor(m.method));
+    const labels = methods
+      .filter((m) => Number.isFinite(m.token_efficiency))
+      .map((m) => METHOD_LABEL[m.method] || m.method);
+
+    const config = {
+      type: "scatter",
+      data: {
+        datasets: [
+          {
+            data: points,
+            backgroundColor: colors,
+            borderColor: cssVar("--surface-1"),
+            borderWidth: 2,
+            radius: 6,
+            hoverRadius: 8,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { top: 20 } },
+        plugins: {
+          legend: { display: false },
+          pointLabel: { labels },
+          tooltip: {
+            callbacks: {
+              label: (item) =>
+                `${item.raw.x.toFixed(0)} tok/correct, ${item.raw.y.toFixed(
+                  1
+                )}% accuracy`,
+            },
+          },
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: "Tokens per correct answer (lower is better)",
+              color: cssVar("--text-muted"),
+              font: { size: 11 },
+            },
+            grid: baseGrid(),
+            ticks: baseTicks(),
+          },
+          y: {
+            title: {
+              display: true,
+              text: "Accuracy",
+              color: cssVar("--text-muted"),
+              font: { size: 11 },
+            },
+            grid: baseGrid(),
+            ticks: { ...baseTicks(), callback: (v) => `${v}%` },
+          },
+        },
+      },
+      plugins: [pointLabelPlugin],
+    };
+
+    charts.pareto = new Chart(ctx, config);
+  }
+
+  // chart: recall / hit rate / mrr grouped bar
+
+  function tooltipCfg(suffix) {
+    return {
+      callbacks: {
+        label: (item) => `${item.dataset.label}: ${item.formattedValue}${suffix}`,
+      },
+    };
+  }
+
+  function renderRetrievalChart(methods) {
+    destroyChart("retrieval");
+    const ctx = document.getElementById("chart-retrieval");
+
+    const metricKeys = ["recall_at_k", "hit_rate", "mrr"];
+    const metricLabels = ["Recall@k", "Hit rate", "MRR"];
+
+    const datasets = methods.map((m) => ({
+      label: METHOD_LABEL[m.method] || m.method,
+      data: metricKeys.map((k) => (m[k] || 0) * 100),
+      backgroundColor: methodColor(m.method),
+      borderColor: cssVar("--surface-1"),
+      borderWidth: 2,
+      borderRadius: 3,
+      maxBarThickness: 22,
+    }));
+
+    charts.retrieval = new Chart(ctx, {
+      type: "bar",
+      data: { labels: metricLabels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: tooltipCfg("%") },
+        scales: {
+          x: { grid: { display: false }, ticks: baseTicks() },
+          y: {
+            beginAtZero: true,
+            max: 100,
+            grid: baseGrid(),
+            ticks: { ...baseTicks(), callback: (v) => `${v}%` },
+          },
+        },
+      },
+    });
+  }
+
+  // chart: failure modes grouped bar
+
+  function renderFailuresChart(methods) {
+    destroyChart("failures");
+    const ctx = document.getElementById("chart-failures");
+
+    const allTypes = Array.from(
+      new Set(methods.flatMap((m) => Object.keys(m.failures || {})))
+    ).sort();
+
+    if (allTypes.length === 0) {
+      charts.failures = null;
+      ctx.getContext("2d").clearRect(0, 0, ctx.width, ctx.height);
+      return;
+    }
+
+    const datasets = methods.map((m) => ({
+      label: METHOD_LABEL[m.method] || m.method,
+      data: allTypes.map((t) => (m.failures || {})[t] || 0),
+      backgroundColor: methodColor(m.method),
+      borderColor: cssVar("--surface-1"),
+      borderWidth: 2,
+      borderRadius: 3,
+      maxBarThickness: 22,
+    }));
+
+    charts.failures = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: allTypes.map((t) => t.replaceAll("_", " ")),
+        datasets,
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: tooltipCfg("") },
+        scales: {
+          x: { grid: { display: false }, ticks: baseTicks() },
+          y: {
+            beginAtZero: true,
+            grid: baseGrid(),
+            ticks: { ...baseTicks(), precision: 0 },
+          },
+        },
+      },
+    });
+  }
+
+  // drill-down table
+
+  function buildQuestionRows(methods) {
+    const withData = methods.filter(
+      (m) => Array.isArray(m.per_question) && m.per_question.length
+    );
+    if (withData.length === 0) return { rows: [], methods: [] };
+
+    const byQuestionId = new Map();
+
+    withData.forEach((m) => {
+      m.per_question.forEach((pq) => {
+        const key = pq.question_id ?? pq.question;
+        if (!byQuestionId.has(key)) {
+          byQuestionId.set(key, {
+            question_id: pq.question_id,
+            question: pq.question,
+            gold_answer: pq.gold_answer,
+            byMethod: {},
+          });
+        }
+        byQuestionId.get(key).byMethod[m.method] = pq;
+      });
+    });
+
+    return {
+      rows: Array.from(byQuestionId.values()),
+      methods: withData.map((m) => m.method),
+    };
+  }
+
+  let tableState = { rows: [], methods: [] };
+
+  function renderTableHead(methods) {
+    const head = document.getElementById("q-table-head");
+    head.innerHTML = "";
+
+    const thQ = document.createElement("th");
+    thQ.textContent = "Question";
+    head.appendChild(thQ);
+
+    methods.forEach((method) => {
+      const th = document.createElement("th");
+      th.className = "method-col";
+      th.textContent = METHOD_LABEL[method] || method;
+      th.dataset.method = method;
+      th.addEventListener("click", () => {
+        sortState =
+          sortState.key === method
+            ? { key: method, dir: -sortState.dir }
+            : { key: method, dir: 1 };
+        renderTableBody();
+      });
+      head.appendChild(th);
+    });
+  }
+
+  function populateFilterOptions(methods) {
+    const sel = document.getElementById("q-filter");
+    sel.innerHTML = "";
+    const allOpt = document.createElement("option");
+    allOpt.value = "all";
+    allOpt.textContent = "All questions";
+    sel.appendChild(allOpt);
+    methods.forEach((method) => {
+      const opt = document.createElement("option");
+      opt.value = `wrong:${method}`;
+      opt.textContent = `${METHOD_LABEL[method] || method} incorrect`;
+      sel.appendChild(opt);
+    });
+  }
+
+  function renderTableBody() {
+    const body = document.getElementById("q-table-body");
+    body.innerHTML = "";
+
+    const search = document.getElementById("q-search").value.toLowerCase();
+    const filter = document.getElementById("q-filter").value;
+
+    let rows = tableState.rows.filter((r) =>
+      r.question.toLowerCase().includes(search)
+    );
+
+    if (filter.startsWith("wrong:")) {
+      const method = filter.slice(6);
+      rows = rows.filter((r) => r.byMethod[method]?.correct === false);
+    }
+
+    if (sortState.key) {
+      rows = rows.slice().sort((a, b) => {
+        const av = a.byMethod[sortState.key]?.correct ? 1 : 0;
+        const bv = b.byMethod[sortState.key]?.correct ? 1 : 0;
+        return (av - bv) * sortState.dir;
+      });
+    }
+
+    document.getElementById("q-count").textContent = `${rows.length} of ${tableState.rows.length} questions`;
+
+    rows.forEach((row, idx) => {
+      const tr = document.createElement("tr");
+      tr.className = "q-row";
+
+      const tdQ = document.createElement("td");
+      tdQ.className = "q-text";
+      tdQ.textContent = row.question;
+      tr.appendChild(tdQ);
+
+      tableState.methods.forEach((method) => {
+        const td = document.createElement("td");
+        td.className = "method-col";
+        const pq = row.byMethod[method];
+        if (pq) {
+          const badge = document.createElement("span");
+          badge.className = `badge ${pq.correct ? "correct" : "incorrect"}`;
+          badge.textContent = pq.correct ? "✓" : "✗";
+          td.appendChild(badge);
+        } else {
+          td.textContent = "—";
+        }
+        tr.appendChild(td);
+      });
+
+      const detailRow = document.createElement("tr");
+      detailRow.className = "detail-row";
+      detailRow.style.display = "none";
+      const detailTd = document.createElement("td");
+      detailTd.colSpan = tableState.methods.length + 1;
+
+      const grid = document.createElement("div");
+      grid.className = "detail-grid";
+
+      const goldBlock = document.createElement("div");
+      goldBlock.className = "detail-block";
+      goldBlock.innerHTML = `<div class="k">Gold answer</div><div class="v"></div>`;
+      goldBlock.querySelector(".v").textContent = row.gold_answer;
+      grid.appendChild(goldBlock);
+
+      tableState.methods.forEach((method) => {
+        const pq = row.byMethod[method];
+        if (!pq) return;
+        const block = document.createElement("div");
+        block.className = "detail-block";
+        const kEl = document.createElement("div");
+        kEl.className = "k";
+        kEl.textContent = `${METHOD_LABEL[method] || method} answer`;
+        const vEl = document.createElement("div");
+        vEl.className = "v";
+        vEl.textContent = pq.generated_answer || "";
+        const chunksEl = document.createElement("div");
+        chunksEl.className = "chunk-id";
+        chunksEl.textContent = `chunks: ${(pq.retrieved_chunk_ids || []).join(", ")}`;
+        block.appendChild(kEl);
+        block.appendChild(vEl);
+        block.appendChild(chunksEl);
+        grid.appendChild(block);
+      });
+
+      detailTd.appendChild(grid);
+      detailRow.appendChild(detailTd);
+
+      tr.addEventListener("click", () => {
+        detailRow.style.display =
+          detailRow.style.display === "none" ? "table-row" : "none";
+      });
+
+      body.appendChild(tr);
+      body.appendChild(detailRow);
+    });
+  }
+
+  function renderTable(methods) {
+    const { rows, methods: withDataMethods } = buildQuestionRows(methods);
+    tableState = { rows, methods: withDataMethods };
+
+    const table = document.getElementById("q-table");
+    const toolbar = document.querySelector(".table-toolbar");
+    const emptyNote = document.getElementById("q-empty");
+
+    if (rows.length === 0) {
+      table.style.display = "none";
+      toolbar.style.display = "none";
+      emptyNote.style.display = "block";
+      return;
+    }
+
+    table.style.display = "";
+    toolbar.style.display = "";
+    emptyNote.style.display = "none";
+
+    renderTableHead(withDataMethods);
+    populateFilterOptions(withDataMethods);
+    renderTableBody();
+  }
+
+  // orchestration
+
+  function renderAll(run) {
+    activeRun = run;
+    const methods = orderedMethods(run.methods);
+
+    renderLegend(methods);
+    renderKpis(methods);
+    renderAccuracyChart(methods);
+    renderParetoChart(methods);
+    renderRetrievalChart(methods);
+    renderFailuresChart(methods);
+    renderTable(methods);
+  }
+
+  document.getElementById("q-search").addEventListener("input", renderTableBody);
+  document.getElementById("q-filter").addEventListener("change", renderTableBody);
+
+  document.getElementById("theme-toggle").addEventListener("click", () => {
+    const root = document.documentElement;
+    const current = root.getAttribute("data-theme");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const next = current === "dark" ? "light" : current === "light" ? "dark" : prefersDark ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    if (activeRun) renderAll(activeRun);
+  });
+
+  if (runs.length === 0) {
+    document.querySelector(".wrap").innerHTML =
+      '<p class="empty-note">No evaluation runs found. Run <code>make evaluate</code> then <code>make dashboard</code>.</p>';
+  } else {
+    populateRunPicker();
+    renderAll(runs[runs.length - 1]);
+  }
+</script>
