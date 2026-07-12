@@ -1,4 +1,4 @@
-from src.llm.token_tracking import TokenTracker
+from finance_bench.llm.token_tracking import TokenTracker
 
 
 def test_token_tracking():

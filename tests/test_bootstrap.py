@@ -1,7 +1,7 @@
 import numpy as np
 
-from src.evaluation.bootstrap import BootstrapCI
-from src.types.schemas import BootstrapConfig
+from finance_bench.evaluation.bootstrap import BootstrapCI
+from finance_bench.types.schemas import BootstrapConfig
 
 
 def test_bootstrap_ci_contains_mean():

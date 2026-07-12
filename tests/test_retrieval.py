@@ -1,5 +1,5 @@
-from src.retrieval.bm25 import BM25Retriever
-from src.types.schemas import BM25Config, DocumentChunk
+from finance_bench.retrieval.bm25 import BM25Retriever
+from finance_bench.types.schemas import BM25Config, DocumentChunk
 
 
 def _make_chunks() -> list[DocumentChunk]:

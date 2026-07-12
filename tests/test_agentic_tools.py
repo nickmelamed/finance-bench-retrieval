@@ -2,8 +2,8 @@ from collections import Counter
 
 import pytest
 
-from src.retrieval.agentic import AgenticRetriever
-from src.types.schemas import AgenticConfig, BM25Config, DocumentChunk, RetrievalResult
+from finance_bench.retrieval.agentic import AgenticRetriever
+from finance_bench.types.schemas import AgenticConfig, BM25Config, DocumentChunk, RetrievalResult
 
 
 def _make_chunks() -> list[DocumentChunk]:

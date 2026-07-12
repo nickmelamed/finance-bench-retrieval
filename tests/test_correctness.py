@@ -1,4 +1,4 @@
-from src.evaluation.correctness import _parse_judge_response
+from finance_bench.evaluation.correctness import _parse_judge_response
 
 
 def test_parse_judge_response_plain_json():

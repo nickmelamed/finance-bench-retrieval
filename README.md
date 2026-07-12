@@ -80,8 +80,8 @@ Question
   per-question drill-down table with each method's generated answer and
   retrieved chunk IDs. Supports light/dark mode and comparing across
   multiple past runs via a run picker.
-- Legacy matplotlib plots (`src/visualizations/plots.py`) still available
-  for accuracy CI / Pareto / failure-mode PNGs.
+- Legacy matplotlib plots (`src/finance_bench/visualizations/plots.py`)
+  still available for accuracy CI / Pareto / failure-mode PNGs.
 
 ---
 
@@ -157,14 +157,14 @@ push/PR.
 * `data` → original dataset and generated chunks
 * `dashboard` → the static results dashboard (`index.html` + generated
   `data.js`)
-* `src/ingest` → chunking + preprocessing
-* `src/retrieval` → retrieval backends, including the agentic tool-use
-  loop
-* `src/llm` → Anthropic client wrappers (single-shot, batch, and
-  multi-turn tool-use), caching, token tracking
-* `src/evaluation` → metrics, gold alignment, bootstrap statistics,
-  correctness grading
-* `src/visualizations` → dashboard data export + legacy matplotlib plots
+* `src/finance_bench` → the installable `finance_bench` package
+  * `ingest` → chunking + preprocessing
+  * `retrieval` → retrieval backends, including the agentic tool-use loop
+  * `llm` → Anthropic client wrappers (single-shot, batch, and
+    multi-turn tool-use), caching, token tracking
+  * `evaluation` → metrics, gold alignment, bootstrap statistics,
+    correctness grading
+  * `visualizations` → dashboard data export + legacy matplotlib plots
 * `outputs` → experiment artifacts (gitignored)
 
 ## Reproducibility

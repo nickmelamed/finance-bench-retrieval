@@ -1,6 +1,6 @@
 import math
 
-from src.evaluation.qa_metrics import accuracy, token_efficiency
+from finance_bench.evaluation.qa_metrics import accuracy, token_efficiency
 
 
 def test_accuracy():

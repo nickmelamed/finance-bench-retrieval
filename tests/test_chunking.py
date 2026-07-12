@@ -1,4 +1,4 @@
-from src.ingest.chunking import TextChunker
+from finance_bench.ingest.chunking import TextChunker
 
 
 def test_chunking():

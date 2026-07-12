@@ -46,33 +46,33 @@ qdrant-logs:
 
 # Full ingestion (chunk + save) + embed/upload to Qdrant
 index:
-	python -m src.experiments.setup_index
+	python -m finance_bench.experiments.setup_index
 
 # Align gold evidence to chunk ids (run after `index`, before `evaluate` -
 # `index` overwrites financebench_examples.json from the raw dataset)
 align:
-	python -m src.evaluation.build_gold_alignment
+	python -m finance_bench.evaluation.build_gold_alignment
 
 # Individual retrieval evaluations
 bm25:
-	python -m src.experiments.run_bm25
+	python -m finance_bench.experiments.run_bm25
 
 dense:
-	python -m src.experiments.run_dense
+	python -m finance_bench.experiments.run_dense
 
 hybrid:
-	python -m src.experiments.run_hybrid
+	python -m finance_bench.experiments.run_hybrid
 
 agentic:
-	python -m src.experiments.run_agentic
+	python -m finance_bench.experiments.run_agentic
 
 # Unified evaluation runner
 evaluate:
-	python -m src.experiments.run_all
+	python -m finance_bench.experiments.run_all
 
 # Regenerate the static dashboard's data from outputs/runs/*
 dashboard:
-	python -m src.visualizations.export_dashboard_data
+	python -m finance_bench.visualizations.export_dashboard_data
 
 # Full end-to-end pipeline:
 # indexing -> gold alignment -> evaluation -> dashboard
