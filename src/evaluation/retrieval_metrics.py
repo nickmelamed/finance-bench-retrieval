@@ -1,5 +1,3 @@
-from collections import defaultdict
-
 
 def recall_at_k(
     retrieved_chunk_ids: list[str],

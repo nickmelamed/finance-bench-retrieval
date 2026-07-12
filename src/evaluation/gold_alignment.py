@@ -55,9 +55,7 @@ class GoldEvidenceAligner:
         chunks: List[Chunk],
     ) -> AlignmentResult:
 
-        matched_chunks = []
-
-        matched_texts = []
+        matched_by_id: dict[str, str] = {}
 
         for evidence in gold_evidence:
 
@@ -67,10 +65,11 @@ class GoldEvidenceAligner:
             )
 
             if chunk is not None:
-                matched_chunks.append(chunk.chunk_id)
-                matched_texts.append(chunk.text)
+                matched_by_id[chunk.chunk_id] = chunk.text
 
-        matched_chunks = list(set(matched_chunks))
+        matched_chunks = list(matched_by_id.keys())
+
+        matched_texts = list(matched_by_id.values())
 
         recall = (
             len(matched_chunks) / max(len(gold_evidence), 1)

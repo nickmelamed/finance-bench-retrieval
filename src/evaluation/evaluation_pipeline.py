@@ -71,23 +71,60 @@ class EvaluationPipeline:
             question=question,
         )
 
-        response = self.client.generate(prompt)
-
-        usage = response.usage
+        result = self.client.generate(prompt)
 
         self.token_tracker.add_prompt_tokens(
-            usage.input_tokens
+            result["usage"]["input_tokens"]
         )
 
         self.token_tracker.add_completion_tokens(
-            usage.output_tokens
+            result["usage"]["output_tokens"]
         )
 
         self.token_tracker.add_retrieval_tokens(
             len(context.split())
         )
 
-        return response.content[0].text
+        return result["text"]
+
+    def answer_batch(
+        self,
+        questions_and_contexts: list[tuple[str, str]],
+    ) -> list[str]:
+        """
+        Batched replacement for calling `answer_question` once per
+        question - submits every QA-generation prompt as ONE
+        Anthropic Message Batch instead of N synchronous calls
+        (50% cheaper). Token tracking is preserved per item.
+        """
+
+        prompts = [
+            self.qa_prompt_template.format(
+                context=context,
+                question=question,
+            )
+            for question, context in questions_and_contexts
+        ]
+
+        results = self.client.generate_batch(prompts)
+
+        for result, (_, context) in zip(
+            results, questions_and_contexts
+        ):
+
+            self.token_tracker.add_prompt_tokens(
+                result["usage"]["input_tokens"]
+            )
+
+            self.token_tracker.add_completion_tokens(
+                result["usage"]["output_tokens"]
+            )
+
+            self.token_tracker.add_retrieval_tokens(
+                len(context.split())
+            )
+
+        return [r["text"] for r in results]
 
     def evaluate(
         self,
@@ -107,10 +144,18 @@ class EvaluationPipeline:
             )
         )
 
-        grading = self.grader.grade(
+        grading, judge_usage = self.grader.grade(
             question=question,
             gold_answer=gold_answer,
             generated_answer=generated_answer,
+        )
+
+        self.token_tracker.add_prompt_tokens(
+            judge_usage["input_tokens"]
+        )
+
+        self.token_tracker.add_completion_tokens(
+            judge_usage["output_tokens"]
         )
 
         if not grading["correct"]:

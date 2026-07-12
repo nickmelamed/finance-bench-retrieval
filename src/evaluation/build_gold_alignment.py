@@ -53,8 +53,8 @@ def main():
         doc_name = item['doc_name']
 
         candidate_chunks = [
-            c for c in chunks 
-            if c.metadata.get("doc_name") == 'doc_name'
+            c for c in chunks
+            if c.metadata.get("doc_name") == doc_name
         ]
 
         alignment = aligner.align(
