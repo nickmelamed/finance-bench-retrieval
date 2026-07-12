@@ -1,8 +1,12 @@
 import json
 
-from finance_bench.retrieval.bm25 import BM25Retriever
+from dotenv import load_dotenv
+
 from finance_bench.config.loaders import load_yaml_config
-from finance_bench.types.schemas import BM25Config
+from finance_bench.retrieval.bm25 import BM25Retriever
+from finance_bench.types.schemas import BM25Config, DocumentChunk
+
+load_dotenv()
 
 config = load_yaml_config(
     "retrieval/bm25.yaml",
@@ -14,7 +18,9 @@ QUERY = "What risks did management mention?"
 
 
 with open("data/processed/chunks.json") as f:
-    chunks = json.load(f)
+    raw_chunks = json.load(f)
+
+chunks = [DocumentChunk.model_validate(chunk) for chunk in raw_chunks]
 
 
 retriever = BM25Retriever(

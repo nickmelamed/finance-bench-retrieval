@@ -1,4 +1,3 @@
-import os
 import json
 
 from dotenv import load_dotenv
@@ -6,6 +5,8 @@ from dotenv import load_dotenv
 from finance_bench.retrieval.dense import DenseRetriever
 from finance_bench.types.schemas import DenseConfig
 from finance_bench.config.loaders import load_yaml_config
+
+load_dotenv()
 
 config = load_yaml_config(
     "retrieval/dense.yaml",
@@ -22,13 +23,8 @@ example = examples[0]
 
 query = example["question"]
 
-load_dotenv()
-
 retriever = DenseRetriever(
-    embedding_model=os.getenv(
-        "EMBEDDING_MODEL"
-    ),
-    top_k=config.top_k,
+    config=config,
 )
 
 

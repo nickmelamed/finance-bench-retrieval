@@ -1,17 +1,27 @@
 import json
-import os
 
 from dotenv import load_dotenv
 
 from finance_bench.retrieval.hybrid import HybridRetriever
 from finance_bench.config.loaders import load_yaml_config
-from finance_bench.types.schemas import HybridConfig
+from finance_bench.types.schemas import BM25Config, DenseConfig, DocumentChunk, HybridConfig
 
-config = load_yaml_config(
+load_dotenv()
+
+hybrid_config = load_yaml_config(
     "retrieval/hybrid.yaml",
     HybridConfig
 )
-load_dotenv()
+
+bm25_config = load_yaml_config(
+    "retrieval/bm25.yaml",
+    BM25Config
+)
+
+dense_config = load_yaml_config(
+    "retrieval/dense.yaml",
+    DenseConfig
+)
 
 with open(
     "data/processed/financebench_examples.json"
@@ -25,15 +35,16 @@ query = example["question"]
 
 
 with open("data/processed/chunks.json") as f:
-    chunks = json.load(f)
+    raw_chunks = json.load(f)
+
+chunks = [DocumentChunk.model_validate(chunk) for chunk in raw_chunks]
 
 
 retriever = HybridRetriever(
     chunks=chunks,
-    embedding_model=os.getenv(
-        "EMBEDDING_MODEL"
-    ),
-    top_k=config.top_k,
+    hybrid_config=hybrid_config,
+    bm25_config=bm25_config,
+    dense_config=dense_config,
 )
 
 
