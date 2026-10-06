@@ -42,14 +42,6 @@ def build_corpus(
             "question_id": example.get(
                 "question_id"
             ),
-            "question": example.get(
-                "question",
-                "",
-            ),
-            "gold_answer": example.get(
-                "gold_answer",
-                "",
-            ),
             "doc_name": example.get(
                 "doc_name",
                 "",
@@ -61,10 +53,6 @@ def build_corpus(
             "question_type": example.get(
                 "question_type",
                 "",
-            ),
-            "evidence_pages": example.get(
-                "evidence_pages",
-                [],
             ),
         }
 
