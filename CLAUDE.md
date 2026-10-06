@@ -1,9 +1,7 @@
 # FinanceBench retrieval evaluation
 
 Compares four retrievers (BM25, dense, hybrid RRF, agentic Claude tool-use
-loop) on the 150-question FinanceBench open-source set. "Good" means the
-accuracy, retrieval and token-cost numbers in the README can be traced to a
-real run and the comparison is fair to every method.
+loop) on the 150-question FinanceBench open-source set.
 
 The full design lives in docs/SPEC.md. Read the relevant section before
 changing anything it covers. Current status and next steps are in
@@ -50,10 +48,10 @@ make evaluate     # real run, calls the API and costs money. Ask first.
 
 ## How to work here
 
-- Plan before multi-file changes. Write the plan down and wait for approval
-  when the task spans several modules or touches the spec.
+- For changes across several modules or the spec, write a plan and wait for
+  approval.
 - A task is done when the Stop hook's checks pass and you have shown the
-  output. Show evidence (commands and results), not claims.
+  commands and their output.
 - Commit in small atomic Conventional Commits (`type(scope): subject`). Code
   and its tests go in the same commit.
 - You may branch and commit locally. Ask before pushing, opening or merging

@@ -1,9 +1,9 @@
 # Spec: FinanceBench retrieval evaluation
 
-Status: DRAFT. Each item is tagged **[confirmed]** (you told me), **[code]**
-(what the code does today, which may differ from intent), or **[inferred]**
-(my guess at intent. Please correct). Section numbers are stable so other
-files can cite them.
+Status: draft. Tags: **[confirmed]** was stated by the owner, **[code]** is
+what the code does, which may differ from intent, and **[inferred]** is
+intent that has not been confirmed. Section numbers are stable so other files
+can cite them.
 
 ## 1. Purpose
 
@@ -100,24 +100,20 @@ its errors are triaged. Install: `uv venv && uv pip install -e .`.
 
 ## 6. Out of scope / not covered
 
-**[unconfirmed]** Nothing here is decided. Candidates I noticed, none
-confirmed: live API and Qdrant behavior, the two empty notebooks, the
-generated `dashboard/data.js`, and the empty `reports/paper/`. Fill this in
-or delete it.
+**[unconfirmed]** Nothing here is decided. Candidates: live API and Qdrant
+behavior, the generated `dashboard/data.js`, and the empty `reports/paper/`.
 
 ## 7. Where the code and the stated intent disagree
 
-Findings from reading the code. You confirmed these are bugs to fix
-(2026-10-06). I have not changed any code yet. Fix order and timing are
-open (see PROGRESS.md once written). The wording of each intended behavior
-below is still my inference.
+These were confirmed as bugs on 2026-10-06. Fix order is tracked in
+PROGRESS.md.
 
 - **7.1 Empty answers are graded correct.** `pred_norm in gold_norm` is true
   for an empty string, so an empty generated answer passes the deterministic
-  check. Verified directly. Bears on rule 5 and every accuracy figure.
+  check. Bears on rule 5 and every accuracy figure.
 - **7.2 Loose numeric match.** Any number in the answer within 2% of any
   number in the gold passes, so a stray year or unrelated figure can match.
-  Also `"3.2"` matches `"The year 2023 saw 3.19"`. Verified.
+  Also `"3.2"` matches `"The year 2023 saw 3.19"`.
 - **7.3 Seeds are not used.** `seed: 42` is in config but nothing seeds
   numpy, so bootstrap CIs vary between runs. README says "deterministic
   seeds."
@@ -134,11 +130,11 @@ below is still my inference.
   assigned whenever the gold answer contains any digit, and nothing compares
   retrieved chunks to gold chunks.
 - **7.8 mypy findings** at `agentic.py:83`, `:133`, `:397` and
-  `run_all.py:395` may be real defects (see Phase 0).
+  `run_all.py:395` may be real defects (run `mypy src`).
 - **7.9 Section splitting never fires.** Chunking collapses all whitespace
   before it looks for headings, and the heading patterns need newlines, so
   the section-aware chunking in 3.1 is dead code. All 187 chunks in
-  `data/processed/chunks.json` have `section_index` 0. Found in Phase 4.
+  `data/processed/chunks.json` have `section_index` 0.
   Not yet confirmed as a bug by the owner. Fixing it changes chunk IDs and
   invalidates the gold alignment (DECISIONS D-005).
 

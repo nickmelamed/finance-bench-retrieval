@@ -45,7 +45,7 @@ Question
 
 - Sparse (BM25), dense (Qdrant), and reciprocal-rank-fusion hybrid
   retrieval
-- **Agentic retrieval** is a real Claude tool-use loop, not a heuristic. The
+- **Agentic retrieval** runs a real Claude tool-use loop. The
   agent has `lexical_search`, `semantic_search`, `get_neighbors`, and
   `rerank` tools, and explicitly calls `submit_evidence` when it decides
   it has enough context. It is bounded by a turn budget, with a fallback path
@@ -98,7 +98,7 @@ questions:
 | agentic | **92.7%**| **92.0%**| 20,849          |
 
 The agentic retriever leads on both accuracy and retrieval quality by a
-wide margin, at a real (and disclosed, not hidden) token-cost premium.
+wide margin, at a higher token cost.
 See the dashboard for the full breakdown, including how that cost
 tradeoff looks per-question.
 

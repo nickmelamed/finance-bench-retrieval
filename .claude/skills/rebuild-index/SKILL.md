@@ -4,8 +4,8 @@ description: Rebuild the chunks, the Qdrant index and the gold chunk IDs in the 
 disable-model-invocation: true
 ---
 
-Changing chunking or the index invalidates the gold alignment, so this
-changes what every metric means. Confirm with the owner first.
+Changing chunking or the index invalidates the gold alignment and earlier
+results. Confirm with the owner first.
 
 1. `make qdrant-up`.
 2. `make index`. This rewrites `data/processed/chunks.json` and

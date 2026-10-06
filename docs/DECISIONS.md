@@ -1,7 +1,6 @@
 # Decisions
 
-Drafted from the code, not from your own account. Edit each entry into
-your words and delete any that are not decisions you made. Newest last.
+Newest last.
 
 ## D-001: Deterministic grading before the LLM judge (2026-07)
 
@@ -99,7 +98,8 @@ Context. Results needed to be viewable without a server.
 Decision. `dashboard/index.html` reads a generated `data.js` built from
 `outputs/runs/*`. The package lives in `src/finance_bench`.
 
-Why. Open the file in a browser. Rejected: a served app.
+Why. Results can be shared as a file and opened with no server or
+dependencies. Rejected: a served app.
 
 Consequences. `data.js` is generated and committed (1.7 MB). It must be
 regenerated whenever runs change.
