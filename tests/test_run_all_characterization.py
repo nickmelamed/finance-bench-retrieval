@@ -34,7 +34,7 @@ class FakeMessages:
         self.calls += 1
         usage = SimpleNamespace(input_tokens=40, output_tokens=7)
         content = [SimpleNamespace(text="hello")]
-        return SimpleNamespace(content=content, usage=usage)
+        return SimpleNamespace(content=content, usage=usage, stop_reason="end_turn")
 
 
 def make_client(monkeypatch):
@@ -85,3 +85,32 @@ def test_accuracy_accepts_int_and_bool_lists(value):
     from finance_bench.evaluation.qa_metrics import accuracy
 
     assert accuracy([int(value)]) == float(value)
+
+
+def test_calls_only_use_arguments_the_installed_sdk_accepts(monkeypatch):
+    import inspect
+
+    from anthropic.resources.messages import Messages
+
+    seen = []
+
+    class Recorder(FakeMessages):
+        def create(self, **kwargs):
+            seen.append(kwargs)
+            return super().create(**kwargs)
+
+    monkeypatch.setattr(client_module, "cache", {})
+    monkeypatch.setattr(
+        client_module,
+        "Anthropic",
+        lambda api_key=None: SimpleNamespace(messages=Recorder()),
+    )
+    client = client_module.ClaudeClient("m")
+    client.generate("prompt")
+    client.generate_with_tools(
+        messages=[{"role": "user", "content": "q"}], tools=[], system="s"
+    )
+    assert len(seen) == 2
+    for kwargs in seen:
+        inspect.signature(Messages.create).bind(None, **kwargs)
+        assert kwargs["extra_body"] == {"temperature": 0.0}

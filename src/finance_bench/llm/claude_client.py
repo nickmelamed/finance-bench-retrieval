@@ -12,6 +12,9 @@ load_dotenv()
 
 ZERO_USAGE = {"input_tokens": 0, "output_tokens": 0}
 
+# anthropic 1.x dropped the temperature keyword, but the API still takes it
+SAMPLING = {"temperature": 0.0}
+
 
 def _from_cache(entry: dict) -> dict:
     return {"text": entry["text"], "usage": dict(entry.get("usage", ZERO_USAGE))}
@@ -46,7 +49,7 @@ class ClaudeClient:
         response = self.client.messages.create(
             model=self.model,
             max_tokens=max_tokens,
-            temperature=0.0,
+            extra_body=SAMPLING,
             messages=[
                 {
                     "role": "user",
@@ -180,7 +183,7 @@ class ClaudeClient:
         response = self.client.messages.create(
             model=self.model,
             max_tokens=max_tokens,
-            temperature=0.0,
+            extra_body=SAMPLING,
             system=system,
             tools=tools,
             messages=messages,
