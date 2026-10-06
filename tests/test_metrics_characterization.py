@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st
@@ -38,11 +40,14 @@ def test_metrics_with_no_gold_or_no_overlap():
     assert mean_reciprocal_rank(["a"], ["b"]) == 0.0
 
 
-def test_current_behavior_recall_ignores_list_length():
-    # SPEC 7.5: recall_at_k scores the whole list, so it has no k.
-    retrieved = ["x"] * 9 + ["g"]
+def test_k_truncates_the_retrieved_list():
+    retrieved = ["x"] * 4 + ["g"]
     assert recall_at_k(retrieved, ["g"]) == 1.0
-    assert retrieval_recall_at_k(retrieved, ["g"], k=5) == 0.0
+    assert recall_at_k(retrieved, ["g"], k=5) == 1.0
+    assert recall_at_k(retrieved, ["g"], k=4) == 0.0
+    assert hit_rate(retrieved, ["g"], k=4) == 0.0
+    assert mean_reciprocal_rank(retrieved, ["g"], k=4) == 0.0
+    assert mean_reciprocal_rank(retrieved, ["g"], k=5) == pytest.approx(1 / 5)
 
 
 @given(ids, ids)
@@ -127,9 +132,9 @@ def test_gold_alignment_drops_evidence_below_threshold():
     assert result.recall == 0.0
 
 
-def test_failure_analyzer_labels_follow_current_heuristics():
+def test_failure_analyzer_labels_follow_heuristics():
     analyzer = FailureAnalyzer()
-    chunk = object()
+    chunk = SimpleNamespace(chunk_id="c1")
     analyzer.classify("q", "answer", "gold", [])
     analyzer.classify("q", "  ", "gold", [chunk])
     analyzer.classify("q", "answer", "gold 5", [chunk])
@@ -139,4 +144,15 @@ def test_failure_analyzer_labels_follow_current_heuristics():
         "empty_generation": 1,
         "numeric_reasoning_failure": 1,
         "semantic_mismatch": 1,
+    }
+
+
+def test_failure_analyzer_flags_missing_gold_chunks_as_retrieval_failure():
+    analyzer = FailureAnalyzer()
+    chunk = SimpleNamespace(chunk_id="c1")
+    analyzer.classify("q", "answer", "gold 5", [chunk], gold_chunk_ids=["c9"])
+    analyzer.classify("q", "answer", "gold 5", [chunk], gold_chunk_ids=["c1"])
+    assert analyzer.summary() == {
+        "retrieval_failure": 1,
+        "numeric_reasoning_failure": 1,
     }

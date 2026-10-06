@@ -2,12 +2,13 @@
 def recall_at_k(
     retrieved_chunk_ids: list[str],
     gold_chunk_ids: list[str],
+    k: int | None = None,
 ) -> float:
 
     if not gold_chunk_ids:
         return 0.0
 
-    retrieved = set(retrieved_chunk_ids)
+    retrieved = set(retrieved_chunk_ids[:k])
 
     gold = set(gold_chunk_ids)
 
@@ -21,9 +22,10 @@ def recall_at_k(
 def hit_rate(
     retrieved_chunk_ids: list[str],
     gold_chunk_ids: list[str],
+    k: int | None = None,
 ) -> float:
 
-    retrieved = set(retrieved_chunk_ids)
+    retrieved = set(retrieved_chunk_ids[:k])
 
     gold = set(gold_chunk_ids)
 
@@ -37,12 +39,13 @@ def hit_rate(
 def mean_reciprocal_rank(
     retrieved_chunk_ids: list[str],
     gold_chunk_ids: list[str],
+    k: int | None = None,
 ) -> float:
 
     gold = set(gold_chunk_ids)
 
     for rank, chunk_id in enumerate(
-        retrieved_chunk_ids,
+        retrieved_chunk_ids[:k],
         start=1,
     ):
 
