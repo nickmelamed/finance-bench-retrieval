@@ -1,12 +1,12 @@
 import hashlib
 import os
 import time
+
 from anthropic import Anthropic
 from dotenv import load_dotenv
 
 from finance_bench.llm.caching import cache
 from finance_bench.utils.logging import logger
-
 
 load_dotenv()
 

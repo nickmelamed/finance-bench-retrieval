@@ -1,7 +1,7 @@
 from collections import defaultdict
 
-from finance_bench.types.schemas import RetrievalResult, HybridConfig
 from finance_bench.config.loaders import load_yaml_config
+from finance_bench.types.schemas import HybridConfig, RetrievalResult
 
 config = load_yaml_config(
     "retrieval/hybrid.yaml",

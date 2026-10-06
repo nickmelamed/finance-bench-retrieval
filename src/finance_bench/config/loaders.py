@@ -1,9 +1,8 @@
 from pathlib import Path
-from typing import Type, TypeVar
+from typing import TypeVar
 
 import yaml
 from pydantic import BaseModel
-
 
 ROOT = Path(__file__).resolve().parents[3]
 
@@ -38,7 +37,7 @@ def load_yaml(
 
 def load_yaml_config(
     relative_path: str,
-    schema: Type[T],
+    schema: type[T],
 ) -> T:
 
     raw = load_yaml(relative_path)

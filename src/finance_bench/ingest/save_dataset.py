@@ -5,7 +5,6 @@ from finance_bench.ingest.financebench_dataset import (
     FinanceBenchDataset,
 )
 
-
 OUTPUT_PATH = (
     "data/processed/"
     "financebench_examples.json"

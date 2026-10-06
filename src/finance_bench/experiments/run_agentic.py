@@ -4,7 +4,12 @@ from dotenv import load_dotenv
 
 from finance_bench.config.loaders import load_yaml_config
 from finance_bench.retrieval.agentic import AgenticRetriever
-from finance_bench.types.schemas import AgenticConfig, BM25Config, DenseConfig, DocumentChunk
+from finance_bench.types.schemas import (
+    AgenticConfig,
+    BM25Config,
+    DenseConfig,
+    DocumentChunk,
+)
 
 load_dotenv()
 

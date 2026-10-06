@@ -2,9 +2,14 @@ import json
 
 from dotenv import load_dotenv
 
-from finance_bench.retrieval.hybrid import HybridRetriever
 from finance_bench.config.loaders import load_yaml_config
-from finance_bench.types.schemas import BM25Config, DenseConfig, DocumentChunk, HybridConfig
+from finance_bench.retrieval.hybrid import HybridRetriever
+from finance_bench.types.schemas import (
+    BM25Config,
+    DenseConfig,
+    DocumentChunk,
+    HybridConfig,
+)
 
 load_dotenv()
 

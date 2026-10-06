@@ -2,14 +2,12 @@ import os
 
 from dotenv import load_dotenv
 
-from finance_bench.retrieval.embeddings import EmbeddingModel
-
 from finance_bench.retrieval.base import BaseRetriever
+from finance_bench.retrieval.embeddings import EmbeddingModel
 from finance_bench.retrieval.qdrant_client import QdrantManager
-
 from finance_bench.types.schemas import (
-    RetrievalResult,
     DenseConfig,
+    RetrievalResult,
 )
 
 load_dotenv()

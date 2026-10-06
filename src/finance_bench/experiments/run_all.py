@@ -4,50 +4,41 @@ import json
 
 from dotenv import load_dotenv
 
-from finance_bench.retrieval.bm25 import BM25Retriever
-from finance_bench.retrieval.dense import DenseRetriever
-from finance_bench.retrieval.hybrid import HybridRetriever
-from finance_bench.retrieval.agentic import AgenticRetriever
-
+from finance_bench.config.loaders import load_yaml_config
+from finance_bench.evaluation.bootstrap import (
+    BootstrapCI,
+)
+from finance_bench.evaluation.evaluation_pipeline import (
+    EvaluationPipeline,
+)
+from finance_bench.evaluation.experiment_tracker import (
+    ExperimentTracker,
+)
 from finance_bench.evaluation.qa_metrics import (
     accuracy,
     token_efficiency,
 )
-
 from finance_bench.evaluation.retrieval_metrics import (
-    recall_at_k,
     hit_rate,
     mean_reciprocal_rank,
+    recall_at_k,
 )
-
-from finance_bench.evaluation.bootstrap import (
-    BootstrapCI,
+from finance_bench.retrieval.agentic import AgenticRetriever
+from finance_bench.retrieval.bm25 import BM25Retriever
+from finance_bench.retrieval.dense import DenseRetriever
+from finance_bench.retrieval.hybrid import HybridRetriever
+from finance_bench.types.schemas import (
+    AgenticConfig,
+    BM25Config,
+    DenseConfig,
+    DocumentChunk,
+    ExperimentConfig,
+    HybridConfig,
+    PromptTemplateConfig,
 )
-
-from finance_bench.evaluation.evaluation_pipeline import (
-    EvaluationPipeline,
-)
-
-from finance_bench.evaluation.experiment_tracker import (
-    ExperimentTracker,
-)
-
 from finance_bench.visualizations.plots import (
     PlotGenerator,
 )
-
-from finance_bench.config.loaders import load_yaml_config
-
-from finance_bench.types.schemas import (
-    ExperimentConfig,
-    BM25Config,
-    DenseConfig,
-    HybridConfig,
-    AgenticConfig,
-    DocumentChunk,
-    PromptTemplateConfig
-)
-
 
 load_dotenv()
 

@@ -3,13 +3,11 @@ from __future__ import annotations
 import json
 import re
 
-from finance_bench.llm.claude_client import ZERO_USAGE, ClaudeClient
-
 from finance_bench.evaluation.answer_normalization import (
     normalize_text,
     numeric_match,
 )
-
+from finance_bench.llm.claude_client import ZERO_USAGE, ClaudeClient
 
 _CODE_FENCE_RE = re.compile(
     r"^```(?:json)?\s*(.*?)\s*```$", re.DOTALL

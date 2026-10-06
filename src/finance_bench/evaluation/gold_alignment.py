@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
 
 from rapidfuzz import fuzz
 
@@ -13,17 +12,17 @@ class Chunk:
     chunk_id: str
     document_id: str
     text: str
-    metadata: Optional[Dict] = None
+    metadata: dict | None = None
 
 
 @dataclass
 class AlignmentResult:
     question_id: str
-    gold_evidence: List[str]
-    matched_chunk_ids: List[str]
+    gold_evidence: list[str]
+    matched_chunk_ids: list[str]
     recall: float
     precision: float
-    matched_texts: List[str]
+    matched_texts: list[str]
 
 
 # gold alignment 
@@ -51,8 +50,8 @@ class GoldEvidenceAligner:
     def align(
         self,
         question_id: str,
-        gold_evidence: List[str],
-        chunks: List[Chunk],
+        gold_evidence: list[str],
+        chunks: list[Chunk],
     ) -> AlignmentResult:
 
         matched_by_id: dict[str, str] = {}
@@ -93,9 +92,9 @@ class GoldEvidenceAligner:
     def _find_best_chunk_match(
         self,
         evidence: str,
-        chunks: List[Chunk],
+        chunks: list[Chunk],
         question_id: str | None = None,
-    ) -> Optional[Chunk]:
+    ) -> Chunk | None:
 
         if not evidence:
             return None
@@ -149,8 +148,8 @@ class GoldEvidenceAligner:
 
 
 def retrieval_recall_at_k(
-    retrieved_chunk_ids: List[str],
-    gold_chunk_ids: List[str],
+    retrieved_chunk_ids: list[str],
+    gold_chunk_ids: list[str],
     k: int,
 ) -> float:
     """
@@ -174,8 +173,8 @@ def retrieval_recall_at_k(
 
 
 def retrieval_hit_rate_at_k(
-    retrieved_chunk_ids: List[str],
-    gold_chunk_ids: List[str],
+    retrieved_chunk_ids: list[str],
+    gold_chunk_ids: list[str],
     k: int,
 ) -> float:
     """
@@ -197,7 +196,7 @@ def retrieval_hit_rate_at_k(
 
 
 def mean_recall_at_k(
-    results: List[Tuple[List[str], List[str]]],
+    results: list[tuple[list[str], list[str]]],
     k: int,
 ) -> float:
     """
@@ -225,7 +224,7 @@ def mean_recall_at_k(
 
 
 def mean_hit_rate_at_k(
-    results: List[Tuple[List[str], List[str]]],
+    results: list[tuple[list[str], list[str]]],
     k: int,
 ) -> float:
 
