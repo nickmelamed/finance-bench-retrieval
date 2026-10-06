@@ -89,4 +89,4 @@ numbers:
 	python scripts/agent/check_numbers.py README.md --sources dashboard
 
 # the fast checks the Stop hook runs
-agent-check: style test
+agent-check: style lint test

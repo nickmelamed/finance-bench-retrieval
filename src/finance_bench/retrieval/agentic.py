@@ -63,7 +63,7 @@ class AgenticRetriever(BaseRetriever):
                 self.dense = DenseRetriever(config=dense_config)
                 self.dense.qdrant.client.get_collections()
                 self._dense_available = True
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 - any client failure disables the tool
                 logger.warning(
                     f"semantic_search tool unavailable "
                     f"(is Qdrant running?): {exc}"
@@ -263,7 +263,7 @@ class AgenticRetriever(BaseRetriever):
                     for item in parsed
                     if isinstance(item, dict) and "chunk_id" in item
                 ]
-            except Exception:
+            except (ValueError, KeyError, TypeError):
                 chunk_ids = []
 
             block["content"] = json.dumps(

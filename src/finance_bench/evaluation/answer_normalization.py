@@ -32,15 +32,7 @@ def extract_numeric_values(text: str) -> list[float]:
         text,
     )
 
-    values = []
-
-    for match in matches:
-        try:
-            values.append(float(match))
-        except Exception:
-            pass
-
-    return values
+    return [float(match) for match in matches]
 
 
 def numeric_match(

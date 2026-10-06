@@ -28,7 +28,7 @@ def _parse_judge_response(text: str) -> dict:
 
     try:
         return json.loads(candidate)
-    except Exception:
+    except ValueError:
         return {
             "correct": False,
             "reason": "invalid_json",
@@ -75,13 +75,10 @@ class CorrectnessGrader:
             return True
 
         # numeric equivalence
-        if numeric_match(
+        return numeric_match(
             gold_answer,
             generated_answer,
-        ):
-            return True
-
-        return False
+        )
 
     def grade(
         self,
