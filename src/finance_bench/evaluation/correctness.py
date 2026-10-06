@@ -36,6 +36,12 @@ def _parse_judge_response(text: str) -> dict:
         }
 
 
+def _contains_whole(text: str, needle: str) -> bool:
+    pattern = rf"(?<!\w)(?<!\d\.){re.escape(needle)}(?!\w|\.\d)"
+
+    return re.search(pattern, text) is not None
+
+
 class CorrectnessGrader:
 
     def __init__(
@@ -63,15 +69,19 @@ class CorrectnessGrader:
             generated_answer
         )
 
+        # an empty string is a substring of everything
+        if not gold_norm or not pred_norm:
+            return False
+
         # exact normalized match
         if gold_norm == pred_norm:
             return True
 
-        # containment
-        if gold_norm in pred_norm:
+        # containment on whole tokens, so 100 is not found inside 100000
+        if _contains_whole(pred_norm, gold_norm):
             return True
 
-        if pred_norm in gold_norm:
+        if _contains_whole(gold_norm, pred_norm):
             return True
 
         # numeric equivalence

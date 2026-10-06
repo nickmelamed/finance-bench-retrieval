@@ -48,18 +48,15 @@ def numeric_match(
     if not gold_vals or not pred_vals:
         return False
 
-    for g in gold_vals:
+    # every number in the gold answer must appear in the prediction
+    return all(
+        any(_within_tolerance(g, p, tolerance) for p in pred_vals)
+        for g in gold_vals
+    )
 
-        for p in pred_vals:
 
-            if g == 0:
-                if abs(p) < tolerance:
-                    return True
+def _within_tolerance(gold: float, pred: float, tolerance: float) -> bool:
+    if gold == 0:
+        return abs(pred) < tolerance
 
-            else:
-                rel_error = abs(g - p) / abs(g)
-
-                if rel_error <= tolerance:
-                    return True
-
-    return False
+    return abs(gold - pred) / abs(gold) <= tolerance
