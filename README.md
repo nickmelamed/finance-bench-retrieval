@@ -3,10 +3,10 @@
 A retrieval evaluation framework comparing four retrieval strategies on the
 FinanceBench benchmark:
 
-- **BM25** — sparse lexical retrieval
-- **Dense** — vector retrieval (Qdrant + BGE-large embeddings)
-- **Hybrid** — reciprocal rank fusion of BM25 + dense
-- **Agentic** — a tool-using Claude agent that decides what to search, when
+- BM25: sparse lexical retrieval
+- Dense: vector retrieval (Qdrant + BGE-large embeddings)
+- Hybrid: reciprocal rank fusion of BM25 + dense
+- Agentic: a tool-using Claude agent that decides what to search, when
   to expand context, when to rerank, and when it has enough evidence to
   stop
 
@@ -20,7 +20,7 @@ Primary metric:
 
 Token Efficiency = Total Tokens / Correct Answers
 
-Also tracked: recall@k, hit rate, and MRR against gold evidence chunks —
+Also tracked: recall@k, hit rate, and MRR against gold evidence chunks,
 i.e. not just "did the final answer come out right," but "did the
 retriever actually find the right passage."
 
@@ -45,10 +45,10 @@ Question
 
 - Sparse (BM25), dense (Qdrant), and reciprocal-rank-fusion hybrid
   retrieval
-- **Agentic retrieval**: a real Claude tool-use loop, not a heuristic. The
+- **Agentic retrieval** is a real Claude tool-use loop, not a heuristic. The
   agent has `lexical_search`, `semantic_search`, `get_neighbors`, and
   `rerank` tools, and explicitly calls `submit_evidence` when it decides
-  it has enough context — bounded by a turn budget, with a fallback path
+  it has enough context. It is bounded by a turn budget, with a fallback path
   if it runs out of turns without submitting. Tuned for cost via
   Anthropic prompt caching (the growing tool-use conversation is cached
   incrementally turn-to-turn) and context trimming (older tool results
@@ -57,12 +57,12 @@ Question
 
 ## Evaluation
 
-- Claude-based correctness grading — a cheap deterministic
+- Claude-based correctness grading, with a cheap deterministic
   normalized/numeric match first, falling back to an LLM judge only when
   that's ambiguous
 - QA generation and judging are submitted via the **Anthropic Message
   Batches API** (50% cheaper than synchronous calls) for all four
-  methods — this doesn't apply to the agentic retriever's own tool-use
+  methods. This doesn't apply to the agentic retriever's own tool-use
   loop, since each turn depends on the last and can't be batched
 - Bootstrap confidence intervals (10,000 resamples, percentile CIs)
 - Retrieval-quality metrics (recall@k, hit rate, MRR) against gold
@@ -73,7 +73,7 @@ Question
 
 ## Visualization
 
-- A self-contained **results dashboard** (`dashboard/index.html`) — open
+- A self-contained **results dashboard** (`dashboard/index.html`). Open
   it directly in a browser, no server required. Accuracy with bootstrap
   CI, a Pareto frontier (accuracy vs. token efficiency), retrieval
   quality bars, failure mode breakdowns, and a searchable/filterable
@@ -98,8 +98,8 @@ questions:
 | agentic | **92.7%**| **92.0%**| 20,849          |
 
 The agentic retriever leads on both accuracy and retrieval quality by a
-wide margin, at a real (and disclosed, not hidden) token-cost premium —
-see the dashboard for the full breakdown, including how that cost
+wide margin, at a real (and disclosed, not hidden) token-cost premium.
+See the dashboard for the full breakdown, including how that cost
 tradeoff looks per-question.
 
 ---

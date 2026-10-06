@@ -76,7 +76,7 @@ class ClaudeClient:
         Message Batch (50% cheaper than the same calls made
         synchronously), poll until it finishes, and return results
         in the same order as `prompts`. Each item is
-        {"text": str, "usage": dict}; cache hits report zero usage,
+        {"text": str, "usage": dict}. Cache hits report zero usage,
         same convention as `generate`.
         """
         cache_keys = [self._cache_key(p, max_tokens) for p in prompts]

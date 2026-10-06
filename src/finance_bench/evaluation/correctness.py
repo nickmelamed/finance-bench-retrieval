@@ -136,7 +136,7 @@ class CorrectnessGrader:
         items: [{"question", "gold_answer", "generated_answer"}, ...]
 
         Batched replacement for calling `grade` once per item.
-        Deterministic matches never touch the API; only ambiguous
+        Deterministic matches never touch the API. Only ambiguous
         items go to the LLM judge, and those are submitted as ONE
         Anthropic Message Batch (50% cheaper than N synchronous
         calls). Returns (grading, usage) tuples in the same order

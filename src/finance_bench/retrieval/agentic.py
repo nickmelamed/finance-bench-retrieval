@@ -225,7 +225,7 @@ class AgenticRetriever(BaseRetriever):
         """
         Move the ephemeral cache breakpoint to the last content block of
         the last message. Anthropic caches everything up to and including
-        a marked block; since `messages` only ever grows by appending,
+        a marked block. Since `messages` only ever grows by appending,
         each turn's prefix matches the previous turn's cached prefix, so
         only the newly-appended tail is charged as fresh input.
         """
