@@ -27,6 +27,13 @@ dependencies = [
     "rapidfuzz>=3.9.0",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "hypothesis>=6.100",
+    "mypy>=1.10",
+    "ruff>=0.16",
+]
+
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
@@ -36,7 +43,7 @@ testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 88
-exclude = ["notebooks"]
+exclude = ["scripts/agent"]
 
 [tool.black]
 line-length = 88
