@@ -259,7 +259,7 @@ class AgenticConfig(BaseRetrieverConfig):
     # context management (prompt caching + trimming)
 
     keep_recent_tool_turns: int = Field(
-        default=5,
+        default=2,
         gt=0,
     )
 

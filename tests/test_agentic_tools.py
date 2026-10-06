@@ -1,3 +1,4 @@
+import json
 from collections import Counter
 
 import pytest
@@ -121,3 +122,29 @@ def test_build_results_uses_full_chunk_text(retriever):
 
 def test_last_retrieval_usage_defaults_to_zero(retriever):
     assert retriever.last_retrieval_usage() == (0, 0)
+
+
+def test_shipped_config_trims_old_tool_results_within_the_turn_budget(retriever):
+    from finance_bench.config.loaders import load_yaml_config
+
+    config = load_yaml_config("retrieval/agentic.yaml", AgenticConfig)
+    retriever.config = config
+
+    def tool_result(chunk_id):
+        payload = json.dumps([{"chunk_id": chunk_id, "text": "full chunk text"}])
+        return {
+            "role": "user",
+            "content": [{"type": "tool_result", "tool_use_id": "t", "content": payload}],
+        }
+
+    # the loop adds at most max_tool_calls - 1 tool results before it must submit
+    results = config.max_tool_calls - 1
+    messages = [tool_result(f"c{i}") for i in range(results)]
+    positions = list(range(results))
+
+    retriever._collapse_stale_tool_results(messages, positions)
+
+    first = json.loads(messages[0]["content"][0]["content"])
+    assert first["chunk_ids"] == ["c0"]
+    assert "full chunk text" not in messages[0]["content"][0]["content"]
+    assert "full chunk text" in messages[-1]["content"][0]["content"]
