@@ -67,24 +67,30 @@ gold chunks and are skipped in retrieval metrics. **[code]**
 Temperature 0, max_tokens 512, model `claude-sonnet-4-6`. **[code]**
 
 3.5 Grading. Normalize (lowercase, strip `,` and `$`, `%` -> " percent ").
-Correct if normalized strings are equal or either contains the other, or any
-number in the answer is within 2% of any number in the gold. Otherwise the
-LLM judge (JSON verdict) decides. **[code]**
+An empty answer is never correct. Correct if normalized strings are equal,
+if either contains the other as whole tokens, or if every number in the gold
+answer has a number in the answer within 2%. Otherwise the LLM judge (JSON
+verdict) decides. **[code]**
 
 3.6 Metrics **[code]**
-- Accuracy: mean correctness. Bootstrap CI: 10,000 resamples, 95% percentile.
-- Retrieval: recall@k = |retrieved ∩ gold| / |gold|, plus hit rate and MRR.
-  Computed only over questions that have gold chunk IDs.
+- Accuracy: mean correctness. Bootstrap CI: 10,000 resamples, 95% percentile,
+  drawn from a generator seeded with the experiment seed.
+- Retrieval: recall@k = |retrieved[:k] ∩ gold| / |gold|, plus hit rate and
+  MRR, with k the retriever's top_k. Computed only over questions that have
+  gold chunk IDs. The result records that count as `retrieval_questions`
+  next to `qa_questions`.
 - Token efficiency = total tokens / correct answers (inf if none correct).
   Total = retrieval-loop prompt+completion + QA prompt+completion + judge
-  prompt+completion + a word count of each context.
+  prompt+completion.
 - Failure modes: heuristic labels for incorrect answers
   (`retrieval_failure`, `empty_generation`, `numeric_reasoning_failure`,
-  `semantic_mismatch`).
+  `semantic_mismatch`). Retrieval failure means nothing was retrieved or
+  none of the gold chunks were.
 
 3.7 Reproducibility **[code, README]**. Responses are disk-cached by
-content, model and max_tokens (`outputs/cache`). A cache hit reports zero
-tokens. Temperature is 0. Runs are written to `outputs/runs/<timestamp>/`.
+content, model and max_tokens (`outputs/cache`). A cache hit reports the
+usage stored with the entry, and entries written before usage was stored
+report zero. Temperature is 0. Runs are written to `outputs/runs/<timestamp>/`.
 
 ## 4. Reported claims
 
@@ -96,45 +102,55 @@ plots.
 ## 5. Check commands
 
 **[confirmed]** Gate: `ruff check .` and `pytest`. mypy joins later, once
-its errors are triaged. Install: `uv venv && uv pip install -e .`.
+its errors are triaged. Install: `uv venv && uv pip install -e ".[dev]"`.
 
 ## 6. Out of scope / not covered
 
 **[unconfirmed]** Nothing here is decided. Candidates: live API and Qdrant
 behavior, the generated `dashboard/data.js`, and the empty `reports/paper/`.
 
-## 7. Where the code and the stated intent disagree
+## 7. Defects found and their status
 
-These were confirmed as bugs on 2026-10-06. Fix order is tracked in
-PROGRESS.md.
+Confirmed as bugs on 2026-10-06 and fixed on branch `fix/section-7-bugs`.
+Each fix has a test in `tests/`.
 
-- **7.1 Empty answers are graded correct.** `pred_norm in gold_norm` is true
-  for an empty string, so an empty generated answer passes the deterministic
-  check. Bears on rule 5 and every accuracy figure.
-- **7.2 Loose numeric match.** Any number in the answer within 2% of any
-  number in the gold passes, so a stray year or unrelated figure can match.
-  Also `"3.2"` matches `"The year 2023 saw 3.19"`.
-- **7.3 Seeds are not used.** `seed: 42` is in config but nothing seeds
-  numpy, so bootstrap CIs vary between runs. README says "deterministic
-  seeds."
-- **7.4 Possible token double count.** QA input tokens already include the
-  context, and a whitespace word count of the context is added again as
-  `retrieval_tokens` (both in the batch path). Cache hits count as zero
-  tokens, so re-runs understate cost. Bears on rule 2.
-- **7.5 Recall@k is not truncated to k.** `recall_at_k` uses the whole
-  retrieved list. It equals recall@top_k only because retrievers return
-  top_k items.
-- **7.6 Retrieval metrics and QA cover different question sets.** Retrieval
-  metrics skip questions with no gold chunks. Accuracy covers all of them.
-- **7.7 Failure labels are heuristic.** "numeric_reasoning_failure" is
-  assigned whenever the gold answer contains any digit, and nothing compares
-  retrieved chunks to gold chunks.
+- **7.1 Empty answers were graded correct.** An empty string is a substring
+  of every gold answer. Fixed: empty answers fail the deterministic check.
+- **7.2 Loose matching.** Substring containment matched `100` inside
+  `100,000`, and one matching number was enough. Fixed: containment needs
+  whole tokens and every gold number must match. Years within 2% of each
+  other still match, which the tolerance cannot tell apart.
+- **7.3 Seeds were not used.** Fixed: `BootstrapConfig.seed` (default 42) seeds
+  a generator, set from `seed` in `experiment.yaml`.
+- **7.4 Token double count.** A word count of the context was added to input
+  tokens that already included it. Cache hits also reported zero. Fixed:
+  the word count is gone and cache entries keep their usage. Clear
+  `outputs/cache` before a run you will report, since older entries have no
+  stored usage.
+- **7.5 Recall was not truncated to k.** Fixed: the metrics take `k` and the
+  evaluation passes the retriever's `top_k`.
+- **7.6 Different question sets.** All 150 questions currently have gold
+  chunks, so nothing differs today. Fixed: the result records both counts
+  and a warning prints when they differ.
+- **7.7 Failure labels ignored the gold chunks.** Fixed: a failure with no
+  gold chunk retrieved is a retrieval failure. The digit heuristic for
+  `numeric_reasoning_failure` remains.
 - **7.8 mypy findings** at `agentic.py:83`, `:133`, `:397` and
-  `run_all.py:395` may be real defects (run `mypy src`).
-- **7.9 Section splitting never fires.** Chunking collapses all whitespace
-  before it looks for headings, and the heading patterns need newlines, so
-  the section-aware chunking in 3.1 is dead code. All 187 chunks in
-  `data/processed/chunks.json` have `section_index` 0.
-  Not yet confirmed as a bug by the owner. Fixing it changes chunk IDs and
-  invalidates the gold alignment (DECISIONS D-005).
+  `run_all.py:395`. Fixed. 28 other mypy errors remain.
+- **7.9 Section splitting never fired.** Whitespace was collapsed before the
+  heading patterns, which need newlines. Fixed. On the current corpus no
+  document has a matching heading, so chunk IDs and text are unchanged and
+  the gold alignment stays valid. A corpus with headings will now chunk
+  differently, which would need `make index` and `make align`.
 
+Open:
+
+- **7.10 Trimming never runs.** `keep_recent_tool_turns` is 5 and
+  `max_tool_calls` is 4, so `_collapse_stale_tool_results` always returns
+  early. The README describes context trimming as active. Either lower the
+  setting or drop the claim. Lowering it changes agentic token counts.
+- **7.11 Corpus metadata holds the answer.** Chunk metadata includes
+  `question` and `gold_answer`. Prompts and BM25 use only chunk text, so
+  results are unaffected today.
+- **7.12 The README results predate these fixes.** Grading, token counts,
+  failure labels and CIs would change on a new run.

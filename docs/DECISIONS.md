@@ -88,8 +88,8 @@ trim stale tool results.
 
 Why. Cheaper repeat runs and a cheaper agent loop.
 
-Consequences. A cache hit reports zero tokens, so token totals depend on
-cache state (see SPEC 7.4).
+Consequences. Entries store their usage, so a cache hit reports the original
+cost. Entries written before that change report zero (see SPEC 7.4).
 
 ## D-008: Static dashboard and src layout (2026-07)
 

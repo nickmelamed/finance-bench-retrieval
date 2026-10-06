@@ -97,6 +97,9 @@ questions:
 | hybrid  | 79.3%    | 63.3%    | 4,942           |
 | agentic | **92.7%**| **92.0%**| 20,849          |
 
+This table predates the grading, token-accounting and metric fixes listed in
+`docs/SPEC.md` section 7, so a new run will differ.
+
 The agentic retriever leads on both accuracy and retrieval quality by a
 wide margin, at a higher token cost.
 See the dashboard for the full breakdown, including how that cost
