@@ -177,3 +177,10 @@ All experiments:
 * log token usage per question, including retrieval-phase LLM cost
 * use fixed prompts (`configs/prompts/`)
 * use structured, Pydantic-validated configs (`configs/`)
+
+## Working with Claude Code
+
+Agent setup for this repo lives in `CLAUDE.md`, `.claude/` and
+`scripts/agent/`. `docs/AGENT_WORKFLOW.md` explains the hooks and workflow,
+`docs/SPEC.md` is the design spec, and `docs/DECISIONS.md` records the
+design choices. `make agent-check` runs the fast checks.
