@@ -13,6 +13,10 @@ load_dotenv()
 ZERO_USAGE = {"input_tokens": 0, "output_tokens": 0}
 
 
+def _from_cache(entry: dict) -> dict:
+    return {"text": entry["text"], "usage": dict(entry.get("usage", ZERO_USAGE))}
+
+
 class ClaudeClient:
     def __init__(self, model: str):
         self.client = Anthropic(
@@ -30,14 +34,14 @@ class ClaudeClient:
     def generate(self, prompt: str, max_tokens: int = 512) -> dict:
         """
         Single-shot cached call. Returns {"text": str, "usage": dict}.
-        A cache hit costs nothing, so its usage is reported as zero -
-        it did no fresh work and shouldn't be double-counted against
-        the token-efficiency metric.
+        A cache hit reports the usage recorded when the response was first
+        generated, so token totals do not depend on cache state. Entries
+        written before usage was stored report zero.
         """
         cache_key = self._cache_key(prompt, max_tokens)
 
         if cache_key in cache:
-            return {"text": cache[cache_key]["text"], "usage": dict(ZERO_USAGE)}
+            return _from_cache(cache[cache_key])
 
         response = self.client.messages.create(
             model=self.model,
@@ -58,7 +62,7 @@ class ClaudeClient:
             "output_tokens": response.usage.output_tokens,
         }
 
-        cache[cache_key] = {"text": text}
+        cache[cache_key] = {"text": text, "usage": usage}
 
         logger.info("Claude response generated")
 
@@ -76,7 +80,7 @@ class ClaudeClient:
         Message Batch (50% cheaper than the same calls made
         synchronously), poll until it finishes, and return results
         in the same order as `prompts`. Each item is
-        {"text": str, "usage": dict}. Cache hits report zero usage,
+        {"text": str, "usage": dict}. Cache hits report the stored usage,
         same convention as `generate`.
         """
         cache_keys = [self._cache_key(p, max_tokens) for p in prompts]
@@ -86,7 +90,7 @@ class ClaudeClient:
 
         for i, (prompt, key) in enumerate(zip(prompts, cache_keys)):
             if key in cache:
-                results[i] = {"text": cache[key]["text"], "usage": dict(ZERO_USAGE)}
+                results[i] = _from_cache(cache[key])
             else:
                 to_submit.append((i, prompt))
 
@@ -145,7 +149,7 @@ class ClaudeClient:
                     "output_tokens": message.usage.output_tokens,
                 }
 
-                cache[key] = {"text": text}
+                cache[key] = {"text": text, "usage": usage}
 
                 results[idx] = {"text": text, "usage": usage}
 
@@ -163,7 +167,7 @@ class ClaudeClient:
         self,
         messages: list[dict],
         tools: list[dict],
-        system: str,
+        system: str | list[dict],
         max_tokens: int = 1024,
     ):
         """

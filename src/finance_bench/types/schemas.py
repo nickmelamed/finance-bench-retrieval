@@ -120,6 +120,8 @@ class BootstrapConfig(BaseModel):
 
     n_bootstrap: int = 10000
 
+    seed: int = 42
+
     confidence_level: float = Field(
         default=0.95,
         ge=0.0,

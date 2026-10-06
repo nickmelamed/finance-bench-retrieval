@@ -10,6 +10,7 @@ class BootstrapCI:
     ):
         self.n_bootstrap = config.n_bootstrap
         self.confidence_level = config.confidence_level
+        self.seed = config.seed
 
     def compute(
         self,
@@ -17,10 +18,12 @@ class BootstrapCI:
     ):
         values = np.array(values)
 
+        rng = np.random.default_rng(self.seed)
+
         means = []
 
         for _ in range(self.n_bootstrap):
-            sample = np.random.choice(
+            sample = rng.choice(
                 values,
                 size=len(values),
                 replace=True,

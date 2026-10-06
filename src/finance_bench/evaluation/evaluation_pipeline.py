@@ -78,10 +78,6 @@ class EvaluationPipeline:
             result["usage"]["output_tokens"]
         )
 
-        self.token_tracker.add_retrieval_tokens(
-            len(context.split())
-        )
-
         return result["text"]
 
     def answer_batch(
@@ -115,10 +111,6 @@ class EvaluationPipeline:
 
             self.token_tracker.add_completion_tokens(
                 result["usage"]["output_tokens"]
-            )
-
-            self.token_tracker.add_retrieval_tokens(
-                len(context.split())
             )
 
         return [r["text"] for r in results]
