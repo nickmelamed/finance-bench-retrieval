@@ -135,3 +135,10 @@ below is still my inference.
   retrieved chunks to gold chunks.
 - **7.8 mypy findings** at `agentic.py:83`, `:133`, `:397` and
   `run_all.py:395` may be real defects (see Phase 0).
+- **7.9 Section splitting never fires.** Chunking collapses all whitespace
+  before it looks for headings, and the heading patterns need newlines, so
+  the section-aware chunking in 3.1 is dead code. All 187 chunks in
+  `data/processed/chunks.json` have `section_index` 0. Found in Phase 4.
+  Not yet confirmed as a bug by the owner. Fixing it changes chunk IDs and
+  invalidates the gold alignment (DECISIONS D-005).
+
