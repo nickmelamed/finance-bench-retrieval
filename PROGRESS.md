@@ -4,20 +4,18 @@ Current phase and what is left.
 
 ## Now
 
-- [ ] Review the two pull requests. `fix/section-7-bugs` is stacked on
-      `chore/agent-standards`.
-- [ ] Decide on SPEC 7.10 (agentic trimming never runs) and 7.11.
+- [ ] Put a valid `ANTHROPIC_API_KEY` in `.env`. The last `make evaluate`
+      stopped at the first API call with a 401 (invalid key). Nothing was
+      spent and no results were written.
+- [ ] Run `make evaluate` and `make dashboard`, then update the README table
+      so `make numbers` passes against the new run.
 
 ## Next
 
-- [ ] Clear `outputs/cache`, then run `make evaluate` and update the README
-      table. It costs API money, and the table predates the fixes.
-- [ ] Triage the remaining 28 mypy errors, then add `mypy src` to
-      `.claude/gate-commands`.
+- [ ] Review the two pull requests. `fix/section-7-bugs` is stacked on
+      `chore/agent-standards`.
 - [ ] Confirm or correct the `[inferred]` items in docs/SPEC.md and edit
       docs/DECISIONS.md into your own words.
-- [ ] Fix the leftover `make format` target, which calls black but black is
-      no longer installed.
 
 ## Done
 
@@ -25,7 +23,9 @@ Current phase and what is left.
 - Style cleanup, characterization tests and ruff clean-up. The gate runs the
   style check, ruff and pytest.
 - Dev dependency group (ruff, mypy, hypothesis). Empty notebooks removed.
-- Fixes for SPEC 7.1 to 7.9.
+- Fixes for SPEC 7.1 to 7.12, including agentic trimming, corpus metadata,
+  mypy (now gated) and `make format`.
+- Qdrant index rebuilt locally (Docker) and gold alignment regenerated.
 
 ## Open questions for the owner
 

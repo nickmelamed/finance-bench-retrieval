@@ -136,21 +136,30 @@ Each fix has a test in `tests/`.
   gold chunk retrieved is a retrieval failure. The digit heuristic for
   `numeric_reasoning_failure` remains.
 - **7.8 mypy findings** at `agentic.py:83`, `:133`, `:397` and
-  `run_all.py:395`. Fixed. 28 other mypy errors remain.
+  `run_all.py:395`. Fixed, along with the rest. `mypy` now reports no
+  issues and is part of the gate and CI.
 - **7.9 Section splitting never fired.** Whitespace was collapsed before the
   heading patterns, which need newlines. Fixed. On the current corpus no
   document has a matching heading, so chunk IDs and text are unchanged and
   the gold alignment stays valid. A corpus with headings will now chunk
   differently, which would need `make index` and `make align`.
 
+- **7.10 Trimming never ran.** `keep_recent_tool_turns` was 5 and
+  `max_tool_calls` is 4, so `_collapse_stale_tool_results` always returned
+  early. Fixed: the shipped value is 2, so the first tool result collapses
+  before the final turn. Agentic token counts will change.
+- **7.11 Corpus metadata held the answer.** Chunk metadata carried
+  `question`, `gold_answer` and `evidence_pages`. Prompts and BM25 used only
+  chunk text, so results were unaffected. Fixed: those fields are no longer
+  copied, and `chunks.json` and the Qdrant payloads were regenerated. Chunk
+  ids, text and gold chunk ids are unchanged.
+- **7.12 `temperature` broke on `anthropic` 1.x.** `messages.create` no
+  longer takes `temperature`, and `pyproject.toml` allows 1.x, so a fresh
+  install raised `TypeError` on the first call. Fixed: temperature goes
+  through `extra_body`, which works on 0.x and 1.x.
+
 Open:
 
-- **7.10 Trimming never runs.** `keep_recent_tool_turns` is 5 and
-  `max_tool_calls` is 4, so `_collapse_stale_tool_results` always returns
-  early. The README describes context trimming as active. Either lower the
-  setting or drop the claim. Lowering it changes agentic token counts.
-- **7.11 Corpus metadata holds the answer.** Chunk metadata includes
-  `question` and `gold_answer`. Prompts and BM25 use only chunk text, so
-  results are unaffected today.
-- **7.12 The README results predate these fixes.** Grading, token counts,
-  failure labels and CIs would change on a new run.
+- **7.13 The README results predate these fixes.** Grading, token counts,
+  failure labels, CIs and agentic trimming would change on a new run. A run
+  needs a valid `ANTHROPIC_API_KEY`.
