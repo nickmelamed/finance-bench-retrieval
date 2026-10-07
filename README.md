@@ -92,13 +92,16 @@ questions:
 
 | Method  | Accuracy | Recall@k | Tokens/correct |
 |---------|----------|----------|-----------------|
-| bm25    | 46.0%    | 24.0%    | 7,931           |
-| dense   | 84.0%    | 71.7%    | 4,895           |
-| hybrid  | 79.3%    | 63.3%    | 4,942           |
-| agentic | **92.7%**| **92.0%**| 20,849          |
+| bm25    | 28.0%    | 24.0%    | 8,884           |
+| dense   | 74.7%    | 73.0%    | 4,162           |
+| hybrid  | 68.0%    | 63.3%    | 4,118           |
+| agentic | **86.7%**| **93.3%**| 20,679          |
 
-This table predates the grading, token-accounting and metric fixes listed in
-`docs/SPEC.md` section 7, so a new run will differ.
+This is run `20261006_171209`, made after the grading, token-accounting and
+metric fixes listed in `docs/SPEC.md` section 7. Earlier figures were higher
+mostly because empty and substring matches were graded correct. The 95%
+bootstrap intervals for accuracy are bm25 21.3% to 35.3%, dense 68.0% to
+81.3%, hybrid 60.7% to 75.3% and agentic 80.7% to 92.0%.
 
 The agentic retriever leads on both accuracy and retrieval quality by a
 wide margin, at a higher token cost.

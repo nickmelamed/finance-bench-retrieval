@@ -158,8 +158,7 @@ Each fix has a test in `tests/`.
   install raised `TypeError` on the first call. Fixed: temperature goes
   through `extra_body`, which works on 0.x and 1.x.
 
-Open:
-
-- **7.13 The README results predate these fixes.** Grading, token counts,
-  failure labels, CIs and agentic trimming would change on a new run. A run
-  needs a valid `ANTHROPIC_API_KEY`.
+- **7.13 The README results predated these fixes.** Fixed: the table comes
+  from run `20261006_171209`, made after every fix above. Accuracy fell for
+  every method, most for bm25 (46.0% to 28.0%) and least for dense and
+  agentic. The ranking is unchanged and agentic still leads.
