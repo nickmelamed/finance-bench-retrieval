@@ -14,18 +14,21 @@ clean:
 
 # development
 
-.PHONY: lint format test check
+.PHONY: lint typecheck format test check
 
 lint:
 	ruff check .
 
+typecheck:
+	mypy
+
 format:
-	black .
+	ruff format .
 
 test:
 	pytest
 
-check: lint test
+check: lint typecheck test
 
 # Qdrant 
 
@@ -89,4 +92,4 @@ numbers:
 	python scripts/agent/check_numbers.py README.md --sources dashboard
 
 # the fast checks the Stop hook runs
-agent-check: style lint test
+agent-check: style lint typecheck test
