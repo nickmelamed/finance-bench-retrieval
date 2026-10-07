@@ -1,6 +1,7 @@
 import hashlib
 import os
 import time
+from typing import Any, cast
 
 from anthropic import Anthropic
 from dotenv import load_dotenv
@@ -14,6 +15,10 @@ ZERO_USAGE = {"input_tokens": 0, "output_tokens": 0}
 
 # anthropic 1.x dropped the temperature keyword, but the API still takes it
 SAMPLING = {"temperature": 0.0}
+
+
+def _first_text(content) -> str:
+    return next((b.text for b in content if b.type == "text"), "")
 
 
 def _from_cache(entry: dict) -> dict:
@@ -58,7 +63,7 @@ class ClaudeClient:
             ],
         )
 
-        text = response.content[0].text
+        text = _first_text(response.content)
 
         usage = {
             "input_tokens": response.usage.input_tokens,
@@ -98,9 +103,9 @@ class ClaudeClient:
                 to_submit.append((i, prompt))
 
         if not to_submit:
-            return results
+            return cast(list[dict], results)
 
-        requests = [
+        requests: list[Any] = [
             {
                 "custom_id": str(i),
                 "params": {
@@ -145,7 +150,7 @@ class ClaudeClient:
             if entry.result.type == "succeeded":
                 message = entry.result.message
 
-                text = message.content[0].text if message.content else ""
+                text = _first_text(message.content)
 
                 usage = {
                     "input_tokens": message.usage.input_tokens,
@@ -164,7 +169,7 @@ class ClaudeClient:
 
                 results[idx] = {"text": "", "usage": dict(ZERO_USAGE)}
 
-        return results
+        return cast(list[dict], results)
 
     def generate_with_tools(
         self,
@@ -184,9 +189,9 @@ class ClaudeClient:
             model=self.model,
             max_tokens=max_tokens,
             extra_body=SAMPLING,
-            system=system,
-            tools=tools,
-            messages=messages,
+            system=cast(Any, system),
+            tools=cast(Any, tools),
+            messages=cast(Any, messages),
         )
 
         logger.info(

@@ -33,7 +33,7 @@ class FakeMessages:
     def create(self, **kwargs):
         self.calls += 1
         usage = SimpleNamespace(input_tokens=40, output_tokens=7)
-        content = [SimpleNamespace(text="hello")]
+        content = [SimpleNamespace(type="text", text="hello")]
         return SimpleNamespace(content=content, usage=usage, stop_reason="end_turn")
 
 
@@ -114,3 +114,12 @@ def test_calls_only_use_arguments_the_installed_sdk_accepts(monkeypatch):
     for kwargs in seen:
         inspect.signature(Messages.create).bind(None, **kwargs)
         assert kwargs["extra_body"] == {"temperature": 0.0}
+
+
+def test_text_comes_from_the_first_text_block_not_the_first_block():
+    blocks = [
+        SimpleNamespace(type="thinking", thinking="..."),
+        SimpleNamespace(type="text", text="answer"),
+    ]
+    assert client_module._first_text(blocks) == "answer"
+    assert client_module._first_text([]) == ""

@@ -159,7 +159,7 @@ class TextChunker:
         if not words:
             return []
 
-        chunks = []
+        chunks: list[DocumentChunk] = []
 
         step = self.chunk_size - self.chunk_overlap
 

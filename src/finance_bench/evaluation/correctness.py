@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+from typing import cast
 
 from finance_bench.evaluation.answer_normalization import (
     normalize_text,
@@ -183,4 +184,4 @@ class CorrectnessGrader:
 
                 results[idx] = (parsed, result["usage"])
 
-        return results
+        return cast(list[tuple[dict, dict]], results)

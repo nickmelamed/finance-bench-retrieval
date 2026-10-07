@@ -28,9 +28,9 @@ class ReciprocalRankFusion:
         self,
         result_lists: list[list[RetrievalResult]],
     ) -> list[RetrievalResult]:
-        fused_scores = defaultdict(float)
+        fused_scores: defaultdict[str, float] = defaultdict(float)
 
-        lookup = {}
+        lookup: dict[str, RetrievalResult] = {}
 
         for results in result_lists:
             for rank, result in enumerate(results):
