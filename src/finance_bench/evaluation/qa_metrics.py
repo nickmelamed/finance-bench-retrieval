@@ -1,8 +1,9 @@
+from collections.abc import Sequence
 
 import numpy as np
 
 
-def accuracy(correctness: list[bool]) -> float:
+def accuracy(correctness: Sequence[int]) -> float:
     """
     Mean accuracy over examples.
     """

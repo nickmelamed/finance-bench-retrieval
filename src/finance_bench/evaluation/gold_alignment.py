@@ -106,7 +106,7 @@ class GoldEvidenceAligner:
         # use smaller evidence window
         evidence = evidence[:2000]
 
-        best_score = 0
+        best_score: float = 0
         best_chunk = None
 
         for chunk in chunks:

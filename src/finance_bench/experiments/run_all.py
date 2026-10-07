@@ -70,7 +70,9 @@ agentic_config = load_yaml_config(
     AgenticConfig,
 )
 
-bootstrap_config = config.bootstrap
+bootstrap_config = config.bootstrap.model_copy(
+    update={"seed": config.seed}
+)
 
 judge_prompt = load_yaml_config(
     "prompts/correctness.yaml",
@@ -162,6 +164,7 @@ def evaluate_retrieval(
             recall_at_k(
                 retrieved_ids,
                 gold_chunk_ids,
+                k=retriever.top_k,
             )
         )
 
@@ -169,6 +172,7 @@ def evaluate_retrieval(
             hit_rate(
                 retrieved_ids,
                 gold_chunk_ids,
+                k=retriever.top_k,
             )
         )
 
@@ -176,6 +180,7 @@ def evaluate_retrieval(
             mean_reciprocal_rank(
                 retrieved_ids,
                 gold_chunk_ids,
+                k=retriever.top_k,
             )
         )
 
@@ -187,8 +192,17 @@ def evaluate_retrieval(
                 f"{total_questions}"
             )
 
+    if len(recalls) != total_questions:
+
+        print(
+            f"[{name}] warning: retrieval metrics cover "
+            f"{len(recalls)} of {total_questions} questions "
+            f"(the rest have no gold chunk ids)"
+        )
+
     return {
         "method": name,
+        "retrieval_questions": len(recalls),
         "recall_at_k": (
             sum(recalls)
             / len(recalls)
@@ -343,6 +357,7 @@ def evaluate_qa(
                 generated_answer=generated_answer,
                 gold_answer=item["gold_answer"],
                 retrieved_chunks=retrieved,
+                gold_chunk_ids=item.get("gold_chunk_ids"),
             )
 
         retrieval_prompt_tokens, retrieval_completion_tokens, retrieval_turns = (
@@ -382,6 +397,7 @@ def evaluate_qa(
 
     return {
         "method": name,
+        "qa_questions": total_questions,
         "accuracy": (
             accuracy(correctness)
         ),

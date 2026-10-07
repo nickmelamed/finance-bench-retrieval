@@ -120,6 +120,8 @@ class BootstrapConfig(BaseModel):
 
     n_bootstrap: int = 10000
 
+    seed: int = 42
+
     confidence_level: float = Field(
         default=0.95,
         ge=0.0,
@@ -257,7 +259,7 @@ class AgenticConfig(BaseRetrieverConfig):
     # context management (prompt caching + trimming)
 
     keep_recent_tool_turns: int = Field(
-        default=5,
+        default=2,
         gt=0,
     )
 

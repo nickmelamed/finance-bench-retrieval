@@ -99,10 +99,13 @@ class TextChunker:
 
         text = text.replace("\x00", " ")
 
-        # normalize whitespace
-        text = re.sub(r"\s+", " ", text)
+        # collapse runs of spaces and tabs but keep line breaks, since the
+        # heading patterns need them to find section boundaries
+        text = re.sub(r"[^\S\n]+", " ", text)
 
-        return text.strip()
+        text = re.sub(r"\s*\n\s*", "\n", text)
+
+        return f"\n{text.strip()}\n"
 
     def _split_sections(
         self,
@@ -156,7 +159,7 @@ class TextChunker:
         if not words:
             return []
 
-        chunks = []
+        chunks: list[DocumentChunk] = []
 
         step = self.chunk_size - self.chunk_overlap
 

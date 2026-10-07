@@ -26,7 +26,7 @@ use_rerank_tool: true
 
 # context management (prompt caching + trimming)
 
-keep_recent_tool_turns: 5
+keep_recent_tool_turns: 2
 
 # diagnostics
 

@@ -1,4 +1,3 @@
-import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
@@ -64,26 +63,21 @@ def test_deterministic_check_numeric_equivalence():
     assert deterministic("$10.0 billion", "about 10.1 billion in revenue")
 
 
-def test_current_behavior_empty_answer_passes_deterministic_check():
-    # SPEC 7.1: pins the bug. Delete when the xfail below is fixed.
-    assert deterministic("Revenue was 5,000 million", "") is True
-
-
-@pytest.mark.xfail(strict=True, reason="SPEC 7.1: empty answer graded correct")
 def test_empty_answer_is_not_correct():
     assert deterministic("Revenue was 5,000 million", "") is False
+    assert deterministic("", "") is False
+    assert deterministic("   ", "5") is False
 
 
-def test_current_behavior_unrelated_number_within_tolerance_passes():
-    # SPEC 7.2: pins the bug.
-    assert deterministic("3.2", "The year 2023 saw 3.19") is True
-
-
-def test_current_behavior_gold_number_inside_larger_number_passes():
-    # SPEC 7.2: substring containment treats 100 as present in 100,000.
-    assert deterministic("100", "In 2023 we hired 100,000 workers") is True
-
-
-@pytest.mark.xfail(strict=True, reason="SPEC 7.2: substring match on numbers")
-def test_gold_number_inside_larger_number_is_not_a_match():
+def test_containment_requires_whole_tokens():
     assert deterministic("100", "In 2023 we hired 100,000 workers") is False
+    assert deterministic("100", "We hired 100 workers") is True
+    assert deterministic("3.2", "It reached 13.25 billion") is False
+    assert deterministic("5", "It grew 5.5 percent") is False
+    assert deterministic("5", "It grew 5 percent") is True
+
+
+def test_every_gold_number_must_appear_in_the_answer():
+    assert numeric_match("5.2 billion in 2022", "5.2 billion")is False
+    assert numeric_match("5.2 billion in 2022", "In 2022 it was 5.2 billion")
+    assert deterministic("3.2", "The year 2023 saw 3.19") is True

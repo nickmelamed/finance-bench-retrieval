@@ -4,46 +4,38 @@ Current phase and what is left.
 
 ## Now
 
-- [ ] Review branch `chore/agent-standards` and decide whether to push it.
-- [ ] Decide which SPEC section 7 bugs to fix, and in what order.
+- [ ] Review and merge the two pull requests. #2 (`fix/section-7-bugs`) is
+      stacked on #1 (`chore/agent-standards`), so merge #1 first, then
+      retarget #2 to `main`.
+- [ ] Wait for CI on both. It had not reported when the branches were pushed.
 
 ## Next
 
-- [ ] Fix confirmed bugs on a separate branch, one `fix:` commit each. Delete
-      the matching "current behavior" test and remove the `xfail` mark in the
-      same commit (7.1 empty answers, 7.2 substring numbers, 7.3 bootstrap
-      seed, 7.4 token double count).
-- [ ] Re-run `make evaluate` after the fixes. It costs API money. The README
-      table is stale until then.
-- [ ] Triage the 45 mypy errors, then add `mypy src` to `.claude/gate-commands`.
-- [ ] Add `ruff`, `mypy` and `hypothesis` as a dev dependency group in
-      `pyproject.toml`. They are installed in `.venv` only.
 - [ ] Confirm or correct the `[inferred]` items in docs/SPEC.md and edit
       docs/DECISIONS.md into your own words.
+- [ ] Fill in SPEC section 6 (out of scope). It is unconfirmed.
+- [ ] Decide whether the agentic retriever should run once per question.
+      It currently runs twice, once for retrieval metrics and once for QA,
+      and the second pass is uncached. Running it once would halve the
+      time (about 2 hours) and the cost of a full run.
+- [ ] Decide what to do with `reports/paper/`, which is empty and untracked.
+- [ ] Consider a newer model than `claude-sonnet-4-6` in
+      `configs/experiment.yaml`. Any change means a new `make evaluate`.
 
 ## Done
 
-- Phase 0: assessment. Retrofit chosen over rebuild.
-- Phase 1: draft docs/SPEC.md and docs/DECISIONS.md.
-- Phase 2: agent tooling v2.0.1, CLAUDE.md, rules, protected paths, hooks,
-  skills `run-evaluation`, `refresh-dashboard`, `rebuild-index`.
-- Phase 3: style cleanup of README and four docstrings.
-- Phase 4: 64 tests (60 pass, 4 strict xfail). Gate runs style and pytest.
-- ruff fixes applied (`81169bf`).
+- Retrofit of the repo to the agent standards, with draft spec and decisions.
+- Style cleanup, characterization tests and ruff clean-up. The Stop gate
+  runs the style check, pytest, ruff and mypy.
+- Dev dependency group (ruff, mypy, hypothesis). Empty notebooks removed.
+- Fixes for SPEC 7.1 to 7.13, including agentic trimming, corpus metadata,
+  the `temperature` break on `anthropic` 1.x, mypy and `make format`.
+- Qdrant index rebuilt locally and gold alignment regenerated.
+- `make evaluate` run `20261006_171209` after the fixes. The dashboard and
+  README table are updated, and `make numbers` passes against both
+  `dashboard/data.js` and the run folder.
+- Qdrant stopped with `make qdrant-down`. Its data volume is kept.
 
 ## Open questions for the owner
 
-- SPEC 7.9: section-aware chunking never fires (all 187 chunks have
-  `section_index` 0). Is that a bug? Fixing it changes every chunk ID and
-  invalidates gold alignment and all results.
-- SPEC 6 is unconfirmed. What is out of scope?
-- README numbers match `dashboard/data.js`, but `outputs/runs/` has result
-  files for only 5 of the runs the README could cite. CLAUDE.md rule 3 says
-  numbers come from `outputs/runs/`. Which is the source of truth?
-- Seven ruff findings remain in `src/` (4 blind excepts, 1 try-except-pass,
-  1 naive `datetime.now()`, 1 needless-bool) and 30 in `scripts/agent/`,
-  which is installed tooling and must not be edited here. To gate on
-  `ruff check .` I need your approval to exclude `scripts/agent` in
-  `pyproject.toml` and to fix or ignore the seven.
-- `notebooks/*.ipynb` are empty files. Keep or delete?
-- `reports/paper/` is empty and untracked.
+- None blocking. See the Next list for decisions.

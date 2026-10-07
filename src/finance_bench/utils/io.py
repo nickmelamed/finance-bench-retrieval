@@ -3,11 +3,11 @@ from pathlib import Path
 import orjson
 
 
-def save_json(data, path: str):
-    path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
+def save_json(data, path: str | Path):
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(path, "wb") as f:
+    with open(target, "wb") as f:
         f.write(orjson.dumps(data, option=orjson.OPT_INDENT_2))
 
 

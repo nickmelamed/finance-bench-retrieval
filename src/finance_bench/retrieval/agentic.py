@@ -79,8 +79,8 @@ class AgenticRetriever(BaseRetriever):
     # public
 
     def retrieve(self, query: str) -> list[RetrievalResult]:
-        self._seen: dict[str, RetrievalResult] = {}
-        self._seen_frequency: Counter = Counter()
+        self._seen = {}
+        self._seen_frequency = Counter()
 
         prompt_tokens = 0
         completion_tokens = 0
@@ -392,7 +392,11 @@ class AgenticRetriever(BaseRetriever):
             top_k = tool_input.get("top_k") or self.config.search_top_k
             results = self.bm25.retrieve(tool_input["query"])[:top_k]
 
-        elif name == "semantic_search" and self._dense_available:
+        elif (
+            name == "semantic_search"
+            and self._dense_available
+            and self.dense is not None
+        ):
             top_k = tool_input.get("top_k") or self.config.search_top_k
             results = self.dense.retrieve(tool_input["query"])[:top_k]
 

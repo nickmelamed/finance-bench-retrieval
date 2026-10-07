@@ -40,16 +40,9 @@ def test_build_context_numbers_chunks_from_one(pipeline):
     assert context == "[Chunk 1]\nalpha\n\n[Chunk 2]\nbeta"
 
 
-def test_current_behavior_context_words_are_added_to_token_total(pipeline):
-    # SPEC 7.4: input tokens already include the context.
-    pipeline.answer_batch([("q", "one two three")])
-    assert pipeline.token_tracker.retrieval_tokens == 3
-    assert pipeline.token_tracker.total_tokens == 100 + 10 + 3
-
-
-@pytest.mark.xfail(strict=True, reason="SPEC 7.4: context counted twice")
 def test_context_is_not_counted_twice(pipeline):
     pipeline.answer_batch([("q", "one two three")])
+    assert pipeline.token_tracker.retrieval_tokens == 0
     assert pipeline.token_tracker.total_tokens == 100 + 10
 
 
@@ -109,7 +102,6 @@ def test_bootstrap_interval_is_ordered_and_within_unit_range(values):
     assert 0.0 <= ci["lower"] <= ci["upper"] <= 1.0
 
 
-@pytest.mark.xfail(strict=True, reason="SPEC 7.3: global numpy state is not seeded")
 def test_bootstrap_ignores_global_random_state():
     config = BootstrapConfig(n_bootstrap=200)
     values = [1, 0, 1, 1, 0, 0, 1, 0]
@@ -118,3 +110,11 @@ def test_bootstrap_ignores_global_random_state():
     np.random.seed(2)
     second = BootstrapCI(config).compute(values)
     assert first == second
+
+
+def test_bootstrap_seed_changes_the_resamples():
+    values = [1, 0, 1, 1, 0, 0, 1, 0]
+    a = BootstrapCI(BootstrapConfig(n_bootstrap=200, seed=1)).compute(values)
+    b = BootstrapCI(BootstrapConfig(n_bootstrap=200, seed=2)).compute(values)
+    assert a["mean"] == b["mean"]
+    assert (a["lower"], a["upper"]) != (b["lower"], b["upper"])

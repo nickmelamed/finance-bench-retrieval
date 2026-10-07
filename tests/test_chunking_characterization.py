@@ -34,10 +34,15 @@ def test_chunk_ids_are_stable_and_unique():
     assert not {c.chunk_id for c in first} & {c.chunk_id for c in other}
 
 
-def test_current_behavior_headings_never_split_sections():
-    # SPEC 7.9: whitespace is collapsed before the heading regex runs, and the
-    # regex needs newlines, so every chunk lands in section 0.
+def test_headings_start_new_sections():
     text = "intro text here\nITEM 1. BUSINESS\nbody one\nITEM 2. RISKS\nbody two"
+    chunks = TextChunker(chunk_size=50, chunk_overlap=5).chunk_document("d", text)
+    assert [c.metadata["section_index"] for c in chunks] == [0, 1, 2]
+    assert chunks[1].text == "ITEM 1. BUSINESS body one"
+
+
+def test_text_without_line_breaks_stays_in_one_section():
+    text = "intro ITEM 1. BUSINESS body"
     chunks = TextChunker(chunk_size=50, chunk_overlap=5).chunk_document("d", text)
     assert {c.metadata["section_index"] for c in chunks} == {0}
 

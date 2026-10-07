@@ -11,10 +11,19 @@ class FailureAnalyzer:
         generated_answer,
         gold_answer,
         retrieved_chunks,
+        gold_chunk_ids=None,
     ):
         failure_type = "unknown"
 
-        if len(retrieved_chunks) == 0:
+        retrieved_ids = {
+            chunk.chunk_id for chunk in retrieved_chunks
+        }
+
+        missed_gold = bool(gold_chunk_ids) and not retrieved_ids.intersection(
+            gold_chunk_ids
+        )
+
+        if len(retrieved_chunks) == 0 or missed_gold:
             failure_type = "retrieval_failure"
 
         elif generated_answer.strip() == "":
