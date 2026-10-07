@@ -1,12 +1,9 @@
 from __future__ import annotations
 
 import os
-from typing import List
 
 from dotenv import load_dotenv
-
 from qdrant_client import QdrantClient
-
 from qdrant_client.models import (
     Distance,
     PointStruct,
@@ -98,8 +95,8 @@ class QdrantManager:
 
     def upload_documents(
         self,
-        chunks: List[DocumentChunk],
-        embeddings: List[List[float]],
+        chunks: list[DocumentChunk],
+        embeddings: list[list[float]],
         batch_size: int = 64,
     ):
 

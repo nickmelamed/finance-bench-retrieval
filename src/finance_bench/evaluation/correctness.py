@@ -3,13 +3,11 @@ from __future__ import annotations
 import json
 import re
 
-from finance_bench.llm.claude_client import ZERO_USAGE, ClaudeClient
-
 from finance_bench.evaluation.answer_normalization import (
     normalize_text,
     numeric_match,
 )
-
+from finance_bench.llm.claude_client import ZERO_USAGE, ClaudeClient
 
 _CODE_FENCE_RE = re.compile(
     r"^```(?:json)?\s*(.*?)\s*```$", re.DOTALL
@@ -30,7 +28,7 @@ def _parse_judge_response(text: str) -> dict:
 
     try:
         return json.loads(candidate)
-    except Exception:
+    except ValueError:
         return {
             "correct": False,
             "reason": "invalid_json",
@@ -77,13 +75,10 @@ class CorrectnessGrader:
             return True
 
         # numeric equivalence
-        if numeric_match(
+        return numeric_match(
             gold_answer,
             generated_answer,
-        ):
-            return True
-
-        return False
+        )
 
     def grade(
         self,
@@ -136,7 +131,7 @@ class CorrectnessGrader:
         items: [{"question", "gold_answer", "generated_answer"}, ...]
 
         Batched replacement for calling `grade` once per item.
-        Deterministic matches never touch the API; only ambiguous
+        Deterministic matches never touch the API. Only ambiguous
         items go to the LLM judge, and those are submitted as ONE
         Anthropic Message Batch (50% cheaper than N synchronous
         calls). Returns (grading, usage) tuples in the same order

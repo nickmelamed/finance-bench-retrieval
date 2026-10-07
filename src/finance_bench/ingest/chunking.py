@@ -2,10 +2,8 @@ from __future__ import annotations
 
 import re
 import uuid
-from typing import Dict, List
 
 from finance_bench.types.schemas import DocumentChunk
-
 
 # SEC / financial filing aware section boundaries
 SECTION_RE = re.compile(
@@ -60,8 +58,8 @@ class TextChunker:
         self,
         document_id: str,
         text: str,
-        metadata: Dict | None = None,
-    ) -> List[DocumentChunk]:
+        metadata: dict | None = None,
+    ) -> list[DocumentChunk]:
 
         metadata = metadata or {}
 
@@ -69,7 +67,7 @@ class TextChunker:
 
         sections = self._split_sections(text)
 
-        chunks: List[DocumentChunk] = []
+        chunks: list[DocumentChunk] = []
 
         global_chunk_index = 0
 
@@ -109,7 +107,7 @@ class TextChunker:
     def _split_sections(
         self,
         text: str,
-    ) -> List[str]:
+    ) -> list[str]:
 
         splits = SECTION_RE.split(text)
 
@@ -148,10 +146,10 @@ class TextChunker:
         self,
         document_id: str,
         text: str,
-        metadata: Dict,
+        metadata: dict,
         section_index: int,
         start_chunk_index: int,
-    ) -> List[DocumentChunk]:
+    ) -> list[DocumentChunk]:
 
         words = text.split()
 

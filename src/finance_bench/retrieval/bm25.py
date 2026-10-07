@@ -3,11 +3,10 @@ import re
 from rank_bm25 import BM25Okapi
 
 from finance_bench.retrieval.base import BaseRetriever
-
 from finance_bench.types.schemas import (
-    RetrievalResult,
     BM25Config,
     DocumentChunk,
+    RetrievalResult,
 )
 
 

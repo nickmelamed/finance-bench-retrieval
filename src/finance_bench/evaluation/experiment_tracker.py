@@ -6,7 +6,7 @@ from finance_bench.utils.io import save_json
 
 class ExperimentTracker:
     def __init__(self):
-        timestamp = datetime.now().strftime(
+        timestamp = datetime.now().astimezone().strftime(
             "%Y%m%d_%H%M%S"
         )
 

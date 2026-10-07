@@ -77,3 +77,16 @@ dashboard:
 # Full end-to-end pipeline:
 # indexing -> gold alignment -> evaluation -> dashboard
 full: qdrant-up index align evaluate dashboard
+
+# agent checks
+
+.PHONY: style numbers agent-check
+
+style:
+	python scripts/agent/check_style.py --changed .
+
+numbers:
+	python scripts/agent/check_numbers.py README.md --sources dashboard
+
+# the fast checks the Stop hook runs
+agent-check: style lint test

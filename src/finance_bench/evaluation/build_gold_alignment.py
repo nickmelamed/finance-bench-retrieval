@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 
 from finance_bench.evaluation.gold_alignment import (
-    GoldEvidenceAligner,
     Chunk,
+    GoldEvidenceAligner,
 )
 
 

@@ -1,15 +1,11 @@
 from __future__ import annotations
 
-from typing import List
-
 from finance_bench.config.loaders import (
     load_yaml_config,
 )
-
 from finance_bench.ingest.chunking import (
     TextChunker,
 )
-
 from finance_bench.types.schemas import (
     DocumentChunk,
     ExperimentConfig,
@@ -18,7 +14,7 @@ from finance_bench.types.schemas import (
 
 def build_corpus(
     examples: list[dict],
-) -> List[DocumentChunk]:
+) -> list[DocumentChunk]:
 
     config = load_yaml_config(
         "experiment.yaml",
@@ -30,7 +26,7 @@ def build_corpus(
         chunk_overlap=config.chunking.chunk_overlap,
     )
 
-    all_chunks: List[DocumentChunk] = []
+    all_chunks: list[DocumentChunk] = []
 
     for example in examples:
 

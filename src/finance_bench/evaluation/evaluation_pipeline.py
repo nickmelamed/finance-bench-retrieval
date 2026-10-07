@@ -1,16 +1,13 @@
 from __future__ import annotations
 
-from finance_bench.llm.claude_client import ClaudeClient
-
-from finance_bench.llm.token_tracking import TokenTracker
-
 from finance_bench.evaluation.correctness import (
     CorrectnessGrader,
 )
-
 from finance_bench.evaluation.failure_analysis import (
     FailureAnalyzer,
 )
+from finance_bench.llm.claude_client import ClaudeClient
+from finance_bench.llm.token_tracking import TokenTracker
 
 
 class EvaluationPipeline:

@@ -6,17 +6,13 @@ from pathlib import Path
 from finance_bench.ingest.build_corpus import (
     build_corpus,
 )
-
 from finance_bench.ingest.financebench_dataset import (
     FinanceBenchDataset,
 )
-
+from finance_bench.retrieval.embeddings import EmbeddingModel
 from finance_bench.retrieval.qdrant_client import (
     QdrantManager,
 )
-
-from finance_bench.retrieval.embeddings import EmbeddingModel
-
 
 OUTPUT_DIR = Path("data/processed")
 

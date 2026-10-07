@@ -4,13 +4,12 @@ from finance_bench.retrieval.dense import DenseRetriever
 from finance_bench.retrieval.fusion import (
     ReciprocalRankFusion,
 )
-
 from finance_bench.types.schemas import (
-    RetrievalResult,
-    HybridConfig,
     BM25Config,
     DenseConfig,
-    DocumentChunk
+    DocumentChunk,
+    HybridConfig,
+    RetrievalResult,
 )
 
 

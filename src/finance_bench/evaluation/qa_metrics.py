@@ -1,8 +1,8 @@
+
 import numpy as np
-from typing import List
 
 
-def accuracy(correctness: List[bool]) -> float:
+def accuracy(correctness: list[bool]) -> float:
     """
     Mean accuracy over examples.
     """
@@ -40,7 +40,7 @@ def token_efficiency(
 
 
 def average_latency(
-    latencies: List[float],
+    latencies: list[float],
 ) -> float:
     """
     Mean latency in seconds.
@@ -53,7 +53,7 @@ def average_latency(
 
 
 def tokens_per_question(
-    token_counts: List[int],
+    token_counts: list[int],
 ) -> float:
     """
     Average tokens used per question.
@@ -66,8 +66,8 @@ def tokens_per_question(
 
 
 def tokens_per_correct_answer(
-    token_counts: List[int],
-    correctness: List[bool],
+    token_counts: list[int],
+    correctness: list[bool],
 ) -> float:
     """
     More robust token efficiency metric.

@@ -3,7 +3,6 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 OUTPUT_DIR = Path("outputs/plots")
 OUTPUT_DIR.mkdir(
     parents=True,
@@ -100,7 +99,7 @@ class PlotGenerator:
             {
                 failure_type
                 for failures in failure_results.values()
-                for failure_type in failures.keys()
+                for failure_type in failures
             }
         )
 

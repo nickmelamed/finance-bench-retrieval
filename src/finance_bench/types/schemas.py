@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
-
 
 # core retrieval/data models 
 
@@ -14,7 +13,7 @@ class DocumentChunk(BaseModel):
     chunk_id: str
     document_id: str
     text: str
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class RetrievalResult(BaseModel):
@@ -24,7 +23,7 @@ class RetrievalResult(BaseModel):
     text: str
     score: float
     retrieval_method: str
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class QAResult(BaseModel):
@@ -40,11 +39,11 @@ class QAResult(BaseModel):
 
     retrieval_method: str
 
-    retrieved_chunks: List[str]
+    retrieved_chunks: list[str]
 
-    latency_seconds: Optional[float] = None
+    latency_seconds: float | None = None
 
-    token_usage: Optional["TokenUsage"] = None
+    token_usage: TokenUsage | None = None
 
 
 class TokenUsage(BaseModel):
@@ -69,11 +68,11 @@ class ExperimentResult(BaseModel):
     total_tokens: int
     correct_answers: int
 
-    avg_latency_seconds: Optional[float] = None
+    avg_latency_seconds: float | None = None
 
-    recall_at_k: Optional[float] = None
-    mrr: Optional[float] = None
-    ndcg: Optional[float] = None
+    recall_at_k: float | None = None
+    mrr: float | None = None
+    ndcg: float | None = None
 
 
 # experiment yaml configs 
